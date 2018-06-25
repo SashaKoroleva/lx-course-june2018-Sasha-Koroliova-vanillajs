@@ -93,7 +93,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line6">line 6</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line456">line 456</a>
     </li></ul></dd>
     
 
@@ -147,7 +147,187 @@
     
 
     
-    <h4 class="name" id="checkFormValues"><span class="type-signature"></span>checkFormValues<span class="signature">(values)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id="changeOrderInfo"><span class="type-signature"></span>changeOrderInfo<span class="signature">(orderId, newInfo)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Make a request to change order info.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>orderId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">id of order string.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>newInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">a JSON string to be sent.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line582">line 582</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the promise object will be resolved once sending the JSON string.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="checkFormValues"><span class="type-signature"></span>checkFormValues<span class="signature">(values)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
     
 
     
@@ -197,7 +377,7 @@
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;string></span>
 
 
             
@@ -248,7 +428,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line310">line 310</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line747">line 747</a>
     </li></ul></dd>
     
 
@@ -286,7 +466,344 @@
     </dt>
     <dd>
         
-<span class="param-type">Boolean</span>
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="createOrder"><span class="type-signature"></span>createOrder<span class="signature">(order)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Makes a request for the addition of an order.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>order</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">a JSON string to be sent.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line556">line 556</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the promise object will be resolved once sending the JSON string.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="createProduct"><span class="type-signature"></span>createProduct<span class="signature">(orderId, product)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Makes a request for the addition of an product.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>orderId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">id of order string.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>product</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">a JSON string to be sent.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line569">line 569</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the promise object will be resolved once sending the JSON string.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
 
 
     </dd>
@@ -354,7 +871,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -405,7 +922,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line157">line 157</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line594">line 594</a>
     </li></ul></dd>
     
 
@@ -511,7 +1028,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -534,7 +1051,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -585,7 +1102,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line170">line 170</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line607">line 607</a>
     </li></ul></dd>
     
 
@@ -693,7 +1210,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line88">line 88</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line534">line 534</a>
     </li></ul></dd>
     
 
@@ -801,7 +1318,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line74">line 74</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line524">line 524</a>
     </li></ul></dd>
     
 
@@ -909,7 +1426,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line102">line 102</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line544">line 544</a>
     </li></ul></dd>
     
 
@@ -965,7 +1482,7 @@
     
 
     
-    <h4 class="name" id="findFlaws"><span class="type-signature"></span>findFlaws<span class="signature">(values)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="findFlaws"><span class="type-signature"></span>findFlaws<span class="signature">(values)</span><span class="type-signature"> &rarr; {Array.&lt;number>}</span></h4>
     
 
     
@@ -1015,7 +1532,7 @@
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;string></span>
 
 
             
@@ -1066,7 +1583,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line328">line 328</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line765">line 765</a>
     </li></ul></dd>
     
 
@@ -1104,7 +1621,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;number></span>
 
 
     </dd>
@@ -1172,7 +1689,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -1195,7 +1712,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -1218,7 +1735,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -1269,7 +1786,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line283">line 283</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line720">line 720</a>
     </li></ul></dd>
     
 
@@ -1292,837 +1809,6 @@
 
 
 
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="handleAddressData"><span class="type-signature"></span>handleAddressData<span class="signature">(addressData)</span><span class="type-signature"> &rarr; {String}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Processes and converts address data to JSON string .
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>addressData</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">array of address data.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line262">line 262</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    a JSON string representing the given value.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="handleClientData"><span class="type-signature"></span>handleClientData<span class="signature">(clientData)</span><span class="type-signature"> &rarr; {String}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Processes and converts client data to JSON string .
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>clientData</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">array of client data.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line240">line 240</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    a JSON string representing the given value.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="handleOrderData"><span class="type-signature"></span>handleOrderData<span class="signature">(orderData)</span><span class="type-signature"> &rarr; {String}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Processes and converts order data to JSON string .
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>orderData</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">array of order data.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line203">line 203</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    a JSON string representing the given value.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="handleProductData"><span class="type-signature"></span>handleProductData<span class="signature">(orderId, productData)</span><span class="type-signature"> &rarr; {String}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Processes and converts product data to JSON string .
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>orderId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">the order id string.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>productData</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">array of product data.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line183">line 183</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    a JSON string representing the given value.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="putEditData"><span class="type-signature"></span>putEditData<span class="signature">(orderId, newInfo)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Make a request to change order info.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>orderId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">id of order string.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>newInfo</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">a JSON string to be sent.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line145">line 145</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    the promise object will be resolved once sending the JSON string.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -2184,7 +1870,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -2207,7 +1893,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -2230,7 +1916,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -2281,7 +1967,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line39">line 39</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line489">line 489</a>
     </li></ul></dd>
     
 
@@ -2337,7 +2023,7 @@
     
 
     
-    <h4 class="name" id="searchOrder"><span class="type-signature"></span>searchOrder<span class="signature">(orders, value)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="searchOrder"><span class="type-signature"></span>searchOrder<span class="signature">(orders, value)</span><span class="type-signature"> &rarr; {Array.&lt;Object>}</span></h4>
     
 
     
@@ -2387,7 +2073,7 @@
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;Object></span>
 
 
             
@@ -2410,7 +2096,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -2461,7 +2147,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line349">line 349</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line786">line 786</a>
     </li></ul></dd>
     
 
@@ -2499,7 +2185,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;Object></span>
 
 
     </dd>
@@ -2517,7 +2203,7 @@
     
 
     
-    <h4 class="name" id="searchProducts"><span class="type-signature"></span>searchProducts<span class="signature">(products, value)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="searchProducts"><span class="type-signature"></span>searchProducts<span class="signature">(products, value)</span><span class="type-signature"> &rarr; {Array.&lt;Object>}</span></h4>
     
 
     
@@ -2567,7 +2253,7 @@
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;Object></span>
 
 
             
@@ -2590,7 +2276,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -2641,7 +2327,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line376">line 376</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line813">line 813</a>
     </li></ul></dd>
     
 
@@ -2679,7 +2365,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;Object></span>
 
 
     </dd>
@@ -2697,7 +2383,7 @@
     
 
     
-    <h4 class="name" id="sendOrder"><span class="type-signature"></span>sendOrder<span class="signature">(order)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="serializeAddressData"><span class="type-signature"></span>serializeAddressData<span class="signature">(addressData)</span><span class="type-signature"> &rarr; {string}</span></h4>
     
 
     
@@ -2705,7 +2391,7 @@
 
 
 <div class="description">
-    Makes a request for the addition of an order.
+    Processes and converts address data to JSON string .
 </div>
 
 
@@ -2741,13 +2427,13 @@
 
         <tr>
             
-                <td class="name"><code>order</code></td>
+                <td class="name"><code>addressData</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">Array.&lt;string></span>
 
 
             
@@ -2757,7 +2443,7 @@
 
             
 
-            <td class="description last">a JSON string to be sent.</td>
+            <td class="description last">array of address data.</td>
         </tr>
 
     
@@ -2798,7 +2484,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line119">line 119</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line699">line 699</a>
     </li></ul></dd>
     
 
@@ -2825,7 +2511,7 @@
 
         
 <div class="param-desc">
-    the promise object will be resolved once sending the JSON string.
+    a JSON string representing the given value.
 </div>
 
 
@@ -2836,7 +2522,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise</span>
+<span class="param-type">string</span>
 
 
     </dd>
@@ -2854,7 +2540,7 @@
     
 
     
-    <h4 class="name" id="sendProduct"><span class="type-signature"></span>sendProduct<span class="signature">(orderId, product)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="serializeClientData"><span class="type-signature"></span>serializeClientData<span class="signature">(clientData)</span><span class="type-signature"> &rarr; {string}</span></h4>
     
 
     
@@ -2862,7 +2548,321 @@
 
 
 <div class="description">
-    Makes a request for the addition of an product.
+    Processes and converts client data to JSON string .
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>clientData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">array of client data.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line677">line 677</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    a JSON string representing the given value.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="serializeOrderData"><span class="type-signature"></span>serializeOrderData<span class="signature">(orderData)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Processes and converts order data to JSON string .
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>orderData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">array of order data.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line640">line 640</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    a JSON string representing the given value.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="serializeProductData"><span class="type-signature"></span>serializeProductData<span class="signature">(orderId, productData)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Processes and converts product data to JSON string .
 </div>
 
 
@@ -2904,7 +2904,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -2914,20 +2914,20 @@
 
             
 
-            <td class="description last">id of order string.</td>
+            <td class="description last">the order id string.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>product</code></td>
+                <td class="name"><code>productData</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">Array.&lt;string></span>
 
 
             
@@ -2937,7 +2937,7 @@
 
             
 
-            <td class="description last">a JSON string to be sent.</td>
+            <td class="description last">array of product data.</td>
         </tr>
 
     
@@ -2978,7 +2978,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line132">line 132</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line620">line 620</a>
     </li></ul></dd>
     
 
@@ -3005,7 +3005,7 @@
 
         
 <div class="param-desc">
-    the promise object will be resolved once sending the JSON string.
+    a JSON string representing the given value.
 </div>
 
 
@@ -3016,7 +3016,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise</span>
+<span class="param-type">string</span>
 
 
     </dd>
@@ -3034,7 +3034,7 @@
     
 
     
-    <h4 class="name" id="sortProducts"><span class="type-signature"></span>sortProducts<span class="signature">(products, property, type, orderOf)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="sortProducts"><span class="type-signature"></span>sortProducts<span class="signature">(products, property, type, orderOf)</span><span class="type-signature"> &rarr; {Array.&lt;Object>}</span></h4>
     
 
     
@@ -3084,7 +3084,7 @@
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;Object></span>
 
 
             
@@ -3107,7 +3107,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -3130,7 +3130,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -3153,7 +3153,7 @@
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -3204,7 +3204,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="aMVC_for_jsDoc.js.html">aMVC_for_jsDoc.js</a>, <a href="aMVC_for_jsDoc.js.html#line401">line 401</a>
+        <a href="aMVC_for_jsDOC.js.html">aMVC_for_jsDOC.js</a>, <a href="aMVC_for_jsDOC.js.html#line838">line 838</a>
     </li></ul></dd>
     
 
@@ -3242,7 +3242,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;Object></span>
 
 
     </dd>
@@ -3270,13 +3270,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Controller.html">Controller</a></li><li><a href="Model.html">Model</a></li><li><a href="View.html">View</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Controller.html">Controller</a></li><li><a href="Model.html">Model</a></li><li><a href="PopupView.html">PopupView</a></li><li><a href="View.html">View</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Jun 15 2018 11:14:59 GMT+0300 (Беларусь (зима))
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jun 25 2018 13:15:28 GMT+0300 (Беларусь (зима))
 </footer>
 
 <script> prettyPrint(); </script>

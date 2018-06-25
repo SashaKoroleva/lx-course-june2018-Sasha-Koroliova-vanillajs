@@ -2,11 +2,20 @@
  * Controller class. Orchestrates the model and view objects. A "glue" between them.
  *
  * @param {View} view view instance.
+ * @param {PopupView} popupView popupView instance.
  * @param {Model} model model instance.
  *
  * @constructor
  */
-function Controller(view, model) {
+function Controller(view, popupView, model) {
+
+    /**
+     * Working array-copy of products.
+     * @type {Object[]}
+     *
+     * @private
+     */
+    var _currentProducts;
 
     /**
      * Initialize controller.
@@ -14,43 +23,8 @@ function Controller(view, model) {
      * @public
      */
     this.init = function () {
-
         this._onUpdateClick();
-
-        var ordersNode = view.getOrdersNode();
-        var orderSearchButton = view.getOrderSearchButton();
-        var updateButton = view.getUpdateButton();
-        var truckButton = view.getTruckButton();
-        var clientButton = view.getClientButton();
-        var productSearchButton = view.getProductSearchButton();
-        var mapButton = view.getMapButton();
-        var createProductButton = view.getCreateProductButton();
-        var deleteOrderButton = view.getDeleteOrderButton();
-        var createOrderButton = view.getCreateOrderButton();
-        var editButton = view.getEditButton();
-        var saveButton = view.getSaveButton();
-        var productList = view.getProductList();
-        var headOfProductList = view.getHeadOfProductList();
-        var closeProductFormButton = view.getCloseProductFormButton();
-        var closeOrderFormButton = view.getCloseOrderFormButton();
-
-        orderSearchButton.addEventListener("click", this._onOrderSearchClick);
-        updateButton.addEventListener("click", this._onUpdateClick);
-        ordersNode.addEventListener("click", this._onOrdersNodeClick);
-        truckButton.addEventListener("click", this._onTruckClick);
-        clientButton.addEventListener("click", this._onClientClick);
-        mapButton.addEventListener("click", this._onMapClick);
-        createProductButton.addEventListener("click", this._onCreateProductClick);
-        deleteOrderButton.addEventListener("click", this._onDeleteOrderClick);
-        createOrderButton.addEventListener("click", this._onCreateOrderClick);
-        productSearchButton.addEventListener("click", this._onProductSearchClick);
-        editButton.addEventListener("click", this._onEditClick);
-        saveButton.addEventListener("click", this._onSaveClick);
-        productList.addEventListener("click", this._onDeleteProductClick);
-        headOfProductList.addEventListener("click", this._onSortClick);
-        closeOrderFormButton.addEventListener("click", this._onCloseOrderFormClick);
-        closeProductFormButton.addEventListener("click", this._onCloseProductFormClick);
-
+        this._declareEventHandlers();
     };
 
     /**
@@ -76,23 +50,25 @@ function Controller(view, model) {
      * @private
      */
     this._onUpdateClick = function () {
+
+        var receivedOrders;
         model
             .fetchOrders()
             .then(function (orders) {
                 if (orders.length) {
-                    model
-                        .fetchProducts(orders[0].id)
-                        .then(function (products) {
-                            view.displaySideBar(orders);
-                            view.displayOrder(orders[0], products);
-                            view.selectFirstOrder();
-                            view.toggleClasses("truckButton");
-                        });
+                    receivedOrders = orders;
+                    return model.fetchProducts(orders[0].id);
                 } else {
                     view.reportThereNoOrders();
                 }
-            });
-
+            })
+            .then(function (products) {
+                _currentProducts = products;
+                view.displaySideBar(receivedOrders);
+                view.displayOrder(receivedOrders[0], products);
+                view.selectFirstOrder();
+                view.toggleClasses("truckButton");
+            })
     };
     /**
      * Shows details of selected order, button click event handler.
@@ -104,25 +80,27 @@ function Controller(view, model) {
      * @private
      */
     this._onOrdersNodeClick = function (event) {
-        var selectedOrder = Array.from(event.path).filter(function (item, index) {
-            if (index < 5) {
-                return item.classList.contains("order-item");
-            }
-            return false;
+        var receivedOrder;
+        var selectedOrder = Array.from(event.path).find(function (item) {
+            return item.classList.contains("order-item")
         });
+
         if (selectedOrder) {
             view.removeClass("selected-order", ".order-item");
-            view.addClass(selectedOrder[0], "selected-order");
+            view.addClass(selectedOrder, "selected-order");
             model
-                .fetchOrder(selectedOrder[0].id)
+                .fetchOrder(selectedOrder.id)
                 .then(function (order) {
-                    model
-                        .fetchProducts(selectedOrder[0].id)
-                        .then(function (products) {
-                            view.displayOrder(order, products);
-                            view.toggleClasses("truckButton");
-                        });
-                });
+                    receivedOrder = order;
+                    return model.fetchProducts(selectedOrder.id)
+                })
+                .then(function (products) {
+                    _currentProducts = products;
+                    view.displayOrder(receivedOrder, products);
+                    view.toggleClasses("truckButton");
+                    view.removeClass("sorted-by", ".fas");
+                })
+
         }
     };
     /**
@@ -132,7 +110,7 @@ function Controller(view, model) {
      *
      * @private
      */
-    this._onTruckClick = function () {
+    this._onAddressInfoClick = function () {
         var orderId = view.getIdOfSelectedOrder();
         model
             .fetchOrder(orderId)
@@ -148,7 +126,7 @@ function Controller(view, model) {
      *
      * @private
      */
-    this._onClientClick = function () {
+    this._onClientInfoClick = function () {
         var orderId = view.getIdOfSelectedOrder();
         model
             .fetchOrder(orderId)
@@ -181,25 +159,24 @@ function Controller(view, model) {
      * @private
      */
     this._onCreateProductClick = function () {
-        var form = view.getProductCreationForm();
-        var values = view.getValuesFromForm(form);
+        var form = popupView.getProductCreationForm();
+        var values = popupView.getFormValues(form);
 
         if (model.checkFormValues(values)) {
             var flawNumbers = model.findFlaws(values);
-            view.reportFlaws(flawNumbers, form);
+            popupView.reportFlaws(flawNumbers, form);
         } else {
             var orderId = view.getIdOfSelectedOrder();
-            var product = model.handleProductData(orderId, values);
+            var product = model.serializeProductData(orderId, values);
             model
-                .sendProduct(orderId, product)
+                .createProduct(orderId, product)
                 .then(function () {
-                    model
-                        .fetchProducts(orderId)
-                        .then(function (products) {
-                            view.displayProducts(products);
-                            view.getCloseProductFormButton().click();
-                            view.clearForm(view.getProductCreationForm());
-                        });
+                    return model.fetchProducts(orderId)
+                })
+                .then(function (products) {
+                    _currentProducts = products;
+                    view.displayProducts(products);
+                    popupView.deleteProductWindow(view.getBody());
                 });
         }
     };
@@ -211,36 +188,28 @@ function Controller(view, model) {
      * @private
      */
     this._onCreateOrderClick = function () {
-        var form = view.getOrderCreationForm();
-        var values = view.getValuesFromForm(form);
+        var form = popupView.getOrderCreationForm();
+        var values = popupView.getFormValues(form);
 
         if (model.checkFormValues(values)) {
             var flawNumbers = model.findFlaws(values);
-            view.reportFlaws(flawNumbers, form);
+            popupView.reportFlaws(flawNumbers, form);
         } else {
-            var order = model.handleOrderData(values);
+            var order = model.serializeOrderData(values);
             model
-                .sendOrder(order)
+                .createOrder(order)
                 .then(function () {
-                    model
-                        .fetchOrders()
-                        .then(function (orders) {
-                            if (orders.length === 1) {
-                                model
-                                    .fetchProducts(orders[0].id)
-                                    .then(function (products) {
-                                        view.displaySideBar(orders);
-                                        view.displayOrder(orders[0], products);
-                                        view.paintOrder();
-                                    })
-                            } else {
-                                view.displaySideBar(orders);
-                                view.paintOrder();
-                            }
-                            view.getCloseOrderFormButton().click();
-                            view.clearForm(view.getOrderCreationForm());
-                        });
-                });
+                    return model.fetchOrders();
+                })
+                .then(function (orders) {
+                    view.displaySideBar(orders);
+                    popupView.deleteOrderWindow(view.getBody());
+                    if (orders.length === 1) {
+                        view.displayOrder(orders[0], []);
+                        _currentProducts = [];
+                    }
+                    view.highlightOrder();
+                })
         }
     };
     /**
@@ -252,26 +221,26 @@ function Controller(view, model) {
      */
     this._onDeleteOrderClick = function () {
         var orderId = view.getIdOfSelectedOrder();
+        var receivedOrders;
         model
             .deleteOrder(orderId)
             .then(function () {
-                model
-                    .fetchOrders()
-                    .then(function (orders) {
-                        if (orders.length) {
-                            model
-                                .fetchProducts(orders[0].id)
-                                .then(function (products) {
-                                    view.displaySideBar(orders);
-                                    view.displayOrder(orders[0], products);
-                                    view.selectFirstOrder();
-                                });
-                        } else {
-                            view.displaySideBar(orders);
-                            view.reportThereNoOrders();
-
-                        }
-                    });
+                return model.fetchOrders();
+            })
+            .then(function (orders) {
+                if (orders.length) {
+                    receivedOrders = orders;
+                    return model.fetchProducts(orders[0].id);
+                } else {
+                    view.displaySideBar(orders);
+                    view.reportThereNoOrders();
+                }
+            })
+            .then(function (products) {
+                _currentProducts = products;
+                view.displaySideBar(receivedOrders);
+                view.displayOrder(receivedOrders[0], products);
+                view.selectFirstOrder();
             });
     };
     /**
@@ -285,17 +254,19 @@ function Controller(view, model) {
      */
     this._onDeleteProductClick = function (event) {
         if (event.target.classList.contains("deleteProduct")) {
+            var receivedOrder;
             var productId = event.target.id;
             var orderId = view.getIdOfSelectedOrder();
             model.deleteProduct(productId, orderId);
             model
                 .fetchOrder(orderId)
                 .then(function (order) {
-                    model
-                        .fetchProducts(orderId)
-                        .then(function (products) {
-                            view.displayOrder(order, products);
-                        });
+                    receivedOrder = order;
+                    return model.fetchProducts(orderId)
+                })
+                .then(function (products) {
+                    _currentProducts = products;
+                    view.displayOrder(receivedOrder, products);
                 });
         }
     };
@@ -319,37 +290,38 @@ function Controller(view, model) {
      */
     this._onSaveClick = function () {
         var orderId = view.getIdOfSelectedOrder();
-        var newInfo;
+        var newInfo, receivedOrder;
         var form = view.getInfoForm();
         var idOfInfoOrder = view.getIdOfInfoAboutOrder();
-        var values = view.getValuesFromForm(form);
-
+        var values = view.getFormValues(form);
+        var client = "client";
+        var address = "address";
 
         if (model.checkFormValues(values)) {
             var flawNumbers = model.findFlaws(values);
             view.reportFlaws(flawNumbers, form);
         } else {
-            if (idOfInfoOrder === "address") {
-                newInfo = model.handleAddressData(values);
+            if (idOfInfoOrder === address) {
+                newInfo = model.serializeAddressData(values);
             } else {
-                newInfo = model.handleClientData(values);
+                newInfo = model.serializeClientData(values);
             }
 
             model
-                .putEditData(orderId, newInfo)
+                .changeOrderInfo(orderId, newInfo)
                 .then(function () {
-                    model
-                        .fetchOrder(orderId)
-                        .then(function (order) {
-                            model.fetchProducts(orderId)
-                                .then(function (products) {
-                                    view.displayOrder(order, products);
-                                    view.changeButtons(view.getEditButton(), view.getSaveButton());
-                                    if (idOfInfoOrder === "client") {
-                                        view.displayClientInfo(order);
-                                    }
-                                });
-                        });
+                    return model.fetchOrder(orderId)
+                })
+                .then(function (order) {
+                    receivedOrder = order;
+                    return model.fetchProducts(orderId)
+                })
+                .then(function (products) {
+                    view.displayOrder(receivedOrder, products);
+                    view.changeButtons(view.getEditButton(), view.getSaveButton());
+                    if (idOfInfoOrder === client) {
+                        view.displayClientInfo(receivedOrder);
+                    }
                 });
         }
     };
@@ -361,7 +333,7 @@ function Controller(view, model) {
      * @private
      */
     this._onCloseProductFormClick = function () {
-        view.clearForm(view.getProductCreationForm());
+        popupView.deleteProductWindow(view.getBody());
     };
     /**
      * Clears form fields when closing, button click event handler.
@@ -371,7 +343,7 @@ function Controller(view, model) {
      * @private
      */
     this._onCloseOrderFormClick = function () {
-        view.clearForm(view.getOrderCreationForm());
+        popupView.deleteOrderWindow(view.getBody());
     };
     /**
      * Sorts products, button click event handler.
@@ -382,12 +354,10 @@ function Controller(view, model) {
      */
     this._onSortClick = function (event) {
         if (event.target.classList.contains("fa-caret-up") || event.target.classList.contains("fa-caret-down")) {
-
-                    view.removeClass("sorted-by", ".fas");
-                    var options = view.defineSortingOptions(event.target);
-                    view.displayProducts(model.sortProducts(view.getProductsFromTable(), options[0], options[1], options[2]));
-                    event.target.classList.add("sorted-by");
-
+            view.removeClass("sorted-by", ".fas");
+            var options = view.defineSortingOptions(event.target);
+            view.displayProducts(model.sortProducts(_currentProducts, options[0], options[1], options[2]));
+            event.target.classList.add("sorted-by");
         }
     };
     /**
@@ -403,6 +373,7 @@ function Controller(view, model) {
             .then(function (products) {
                 var productSearchInput = view.getProductSearchInput();
                 var rightProducts = model.searchProducts(products, productSearchInput.value);
+                _currentProducts = rightProducts;
                 var sortItem = view.checkSortIsOn();
 
                 if (sortItem != null) {
@@ -413,8 +384,68 @@ function Controller(view, model) {
                 }
             });
     };
+    /**
+     * Creates a window for creating an order.
+     *
+     * @private
+     */
+    this._onOpenOrderFormClick = function () {
+        popupView.displayOrderWindow(view.getBody());
+        var createOrderButton = popupView.getCreateOrderButton();
+        createOrderButton.addEventListener("click", this._onCreateOrderClick);
+        var closeOrderFormButton = popupView.getCloseOrderFormButton();
+        closeOrderFormButton.addEventListener("click", this._onCloseOrderFormClick);
+    };
+    /**
+     * Creates a window for creating a product.
+     *
+     * @private
+     */
+    this._onOpenProductFormClick = function () {
+        popupView.displayProductWindow(view.getBody());
+        var createProductButton = popupView.getCreateProductButton();
+        createProductButton.addEventListener("click", this._onCreateProductClick);
+        var closeProductFormButton = popupView.getCloseProductFormButton();
+        closeProductFormButton.addEventListener("click", this._onCloseProductFormClick);
+    };
+    /**
+     * Declares event handlers.
+     *
+     * @private
+     */
+    this._declareEventHandlers = function () {
+        var ordersNode = view.getOrdersNode();
+        var orderSearchButton = view.getOrderSearchButton();
+        var updateButton = view.getUpdateButton();
+        var truckButton = view.getTruckButton();
+        var clientButton = view.getClientButton();
+        var productSearchButton = view.getProductSearchButton();
+        var mapButton = view.getMapButton();
+        var deleteOrderButton = view.getDeleteOrderButton();
+        var editButton = view.getEditButton();
+        var saveButton = view.getSaveButton();
+        var productList = view.getProductList();
+        var headOfProductList = view.getHeadOfProductList();
+        var openOrderFormButton = view.getOpenOrderFormButton();
+        var openProductFormButton = view.getOpenProductFormButton();
 
+        orderSearchButton.addEventListener("click", this._onOrderSearchClick);
+        updateButton.addEventListener("click", this._onUpdateClick);
+        ordersNode.addEventListener("click", this._onOrdersNodeClick);
+        truckButton.addEventListener("click", this._onAddressInfoClick);
+        clientButton.addEventListener("click", this._onClientInfoClick);
+        mapButton.addEventListener("click", this._onMapClick);
+        deleteOrderButton.addEventListener("click", this._onDeleteOrderClick);
+        productSearchButton.addEventListener("click", this._onProductSearchClick);
+        editButton.addEventListener("click", this._onEditClick);
+        saveButton.addEventListener("click", this._onSaveClick);
+        productList.addEventListener("click", this._onDeleteProductClick);
+        headOfProductList.addEventListener("click", this._onSortClick);
+        openOrderFormButton.addEventListener("click", this._onOpenOrderFormClick.bind(this));
+        openProductFormButton.addEventListener("click", this._onOpenProductFormClick.bind(this));
+
+    };
 
 }
 
-(new Controller(new View, new Model)).init();
+(new Controller(new View, new PopupView, new Model)).init();

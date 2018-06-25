@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: aMVC_for_jsDoc.js</title>
+    <title>JSDoc: Source: aMVC_for_jsDOC.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: aMVC_for_jsDoc.js</h1>
+    <h1 class="page-title">Source: aMVC_for_jsDOC.js</h1>
 
     
 
@@ -27,6 +27,456 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
+ * Controller class. Orchestrates the model and view objects. A "glue" between them.
+ *
+ * @param {View} view view instance.
+ * @param {PopupView} popupView popupView instance.
+ * @param {Model} model model instance.
+ *
+ * @constructor
+ */
+function Controller(view, popupView, model) {
+
+    /**
+     * Working array-copy of products.
+     * @type {Object[]}
+     *
+     * @private
+     */
+    var _currentProducts;
+
+    /**
+     * Initialize controller.
+     *
+     * @public
+     */
+    this.init = function () {
+        this._onUpdateClick();
+        this._declareEventHandlers();
+    };
+
+    /**
+     * Searches for an order, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onOrderSearchClick = function () {
+        model
+            .fetchOrders()
+            .then(function (orders) {
+                var orderSearchInput = view.getOrderSearchInput();
+                view.displaySideBar(model.searchOrder(orders, orderSearchInput.value));
+            });
+    };
+    /**
+     * Updates order list, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onUpdateClick = function () {
+
+        var receivedOrders;
+        model
+            .fetchOrders()
+            .then(function (orders) {
+                if (orders.length) {
+                    receivedOrders = orders;
+                    return model.fetchProducts(orders[0].id);
+                } else {
+                    view.reportThereNoOrders();
+                }
+            })
+            .then(function (products) {
+                _currentProducts = products;
+                view.displaySideBar(receivedOrders);
+                view.displayOrder(receivedOrders[0], products);
+                view.selectFirstOrder();
+                view.toggleClasses("truckButton");
+            })
+    };
+    /**
+     * Shows details of selected order, button click event handler.
+     *
+     * @listens click
+     *
+     * @param {Event} event the DOM event object.
+     *
+     * @private
+     */
+    this._onOrdersNodeClick = function (event) {
+        var receivedOrder;
+        var selectedOrder = Array.from(event.path).find(function (item) {
+            return item.classList.contains("order-item")
+        });
+
+        if (selectedOrder) {
+            view.removeClass("selected-order", ".order-item");
+            view.addClass(selectedOrder, "selected-order");
+            model
+                .fetchOrder(selectedOrder.id)
+                .then(function (order) {
+                    receivedOrder = order;
+                    return model.fetchProducts(selectedOrder.id)
+                })
+                .then(function (products) {
+                    _currentProducts = products;
+                    view.displayOrder(receivedOrder, products);
+                    view.toggleClasses("truckButton");
+                    view.removeClass("sorted-by", ".fas");
+                })
+
+        }
+    };
+    /**
+     * Shows shipping address, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onAddressInfoClick = function () {
+        var orderId = view.getIdOfSelectedOrder();
+        model
+            .fetchOrder(orderId)
+            .then(function (order) {
+                view.displayShipTo(order);
+                view.toggleClasses("truckButton");
+            });
+    };
+    /**
+     * Shows info about client, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onClientInfoClick = function () {
+        var orderId = view.getIdOfSelectedOrder();
+        model
+            .fetchOrder(orderId)
+            .then(function (order) {
+                view.displayClientInfo(order);
+                view.toggleClasses("clientButton")
+            });
+    };
+    /**
+     * Shows address on map, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onMapClick = function () {
+        model
+            .fetchOrder(view.getIdOfSelectedOrder())
+            .then(function (order) {
+                view.displayMap();
+                model.getMapWithCoordinates(order.shipTo.address, order.shipTo.region, order.shipTo.country);
+                view.toggleClasses("mapButton");
+            });
+    };
+    /**
+     * Creates a product, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onCreateProductClick = function () {
+        var form = popupView.getProductCreationForm();
+        var values = popupView.getFormValues(form);
+
+        if (model.checkFormValues(values)) {
+            var flawNumbers = model.findFlaws(values);
+            popupView.reportFlaws(flawNumbers, form);
+        } else {
+            var orderId = view.getIdOfSelectedOrder();
+            var product = model.serializeProductData(orderId, values);
+            model
+                .createProduct(orderId, product)
+                .then(function () {
+                    return model.fetchProducts(orderId)
+                })
+                .then(function (products) {
+                    _currentProducts = products;
+                    view.displayProducts(products);
+                    popupView.deleteProductWindow(view.getBody());
+                });
+        }
+    };
+    /**
+     * Creates an order, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onCreateOrderClick = function () {
+        var form = popupView.getOrderCreationForm();
+        var values = popupView.getFormValues(form);
+
+        if (model.checkFormValues(values)) {
+            var flawNumbers = model.findFlaws(values);
+            popupView.reportFlaws(flawNumbers, form);
+        } else {
+            var order = model.serializeOrderData(values);
+            model
+                .createOrder(order)
+                .then(function () {
+                    return model.fetchOrders();
+                })
+                .then(function (orders) {
+                    view.displaySideBar(orders);
+                    popupView.deleteOrderWindow(view.getBody());
+                    if (orders.length === 1) {
+                        view.displayOrder(orders[0], []);
+                        _currentProducts = [];
+                    }
+                    view.highlightOrder();
+                })
+        }
+    };
+    /**
+     * Deletes an order, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onDeleteOrderClick = function () {
+        var orderId = view.getIdOfSelectedOrder();
+        var receivedOrders;
+        model
+            .deleteOrder(orderId)
+            .then(function () {
+                return model.fetchOrders();
+            })
+            .then(function (orders) {
+                if (orders.length) {
+                    receivedOrders = orders;
+                    return model.fetchProducts(orders[0].id);
+                } else {
+                    view.displaySideBar(orders);
+                    view.reportThereNoOrders();
+                }
+            })
+            .then(function (products) {
+                _currentProducts = products;
+                view.displaySideBar(receivedOrders);
+                view.displayOrder(receivedOrders[0], products);
+                view.selectFirstOrder();
+            });
+    };
+    /**
+     * Deletes a product, button click event handler.
+     *
+     * @listens click
+     *
+     * @param {Event} event the DOM event object.
+     *
+     * @private
+     */
+    this._onDeleteProductClick = function (event) {
+        if (event.target.classList.contains("deleteProduct")) {
+            var receivedOrder;
+            var productId = event.target.id;
+            var orderId = view.getIdOfSelectedOrder();
+            model.deleteProduct(productId, orderId);
+            model
+                .fetchOrder(orderId)
+                .then(function (order) {
+                    receivedOrder = order;
+                    return model.fetchProducts(orderId)
+                })
+                .then(function (products) {
+                    _currentProducts = products;
+                    view.displayOrder(receivedOrder, products);
+                });
+        }
+    };
+    /**
+     * Makes info editable, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onEditClick = function () {
+        view.changeButtons(view.getSaveButton(), view.getEditButton());
+        view.makeDataEditable();
+    };
+    /**
+     * Saves changed info, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onSaveClick = function () {
+        var orderId = view.getIdOfSelectedOrder();
+        var newInfo, receivedOrder;
+        var form = view.getInfoForm();
+        var idOfInfoOrder = view.getIdOfInfoAboutOrder();
+        var values = view.getFormValues(form);
+        var client = "client";
+        var address = "address";
+
+        if (model.checkFormValues(values)) {
+            var flawNumbers = model.findFlaws(values);
+            view.reportFlaws(flawNumbers, form);
+        } else {
+            if (idOfInfoOrder === address) {
+                newInfo = model.serializeAddressData(values);
+            } else {
+                newInfo = model.serializeClientData(values);
+            }
+
+            model
+                .changeOrderInfo(orderId, newInfo)
+                .then(function () {
+                    return model.fetchOrder(orderId)
+                })
+                .then(function (order) {
+                    receivedOrder = order;
+                    return model.fetchProducts(orderId)
+                })
+                .then(function (products) {
+                    view.displayOrder(receivedOrder, products);
+                    view.changeButtons(view.getEditButton(), view.getSaveButton());
+                    if (idOfInfoOrder === client) {
+                        view.displayClientInfo(receivedOrder);
+                    }
+                });
+        }
+    };
+    /**
+     * Clears form fields when closing, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onCloseProductFormClick = function () {
+        popupView.deleteProductWindow(view.getBody());
+    };
+    /**
+     * Clears form fields when closing, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onCloseOrderFormClick = function () {
+        popupView.deleteOrderWindow(view.getBody());
+    };
+    /**
+     * Sorts products, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onSortClick = function (event) {
+        if (event.target.classList.contains("fa-caret-up") || event.target.classList.contains("fa-caret-down")) {
+            view.removeClass("sorted-by", ".fas");
+            var options = view.defineSortingOptions(event.target);
+            view.displayProducts(model.sortProducts(_currentProducts, options[0], options[1], options[2]));
+            event.target.classList.add("sorted-by");
+        }
+    };
+    /**
+     * Searches for a product, button click event handler.
+     *
+     * @listens click
+     *
+     * @private
+     */
+    this._onProductSearchClick = function () {
+        model
+            .fetchProducts(view.getIdOfSelectedOrder())
+            .then(function (products) {
+                var productSearchInput = view.getProductSearchInput();
+                var rightProducts = model.searchProducts(products, productSearchInput.value);
+                _currentProducts = rightProducts;
+                var sortItem = view.checkSortIsOn();
+
+                if (sortItem != null) {
+                    var options = view.defineSortingOptions(sortItem);
+                    view.displayProducts(model.sortProducts(rightProducts, options[0], options[1], options[2]));
+                } else {
+                    view.displayProducts(model.searchProducts(products, productSearchInput.value));
+                }
+            });
+    };
+    /**
+     * Creates a window for creating an order.
+     *
+     * @private
+     */
+    this._onOpenOrderFormClick = function () {
+        popupView.displayOrderWindow(view.getBody());
+        var createOrderButton = popupView.getCreateOrderButton();
+        createOrderButton.addEventListener("click", this._onCreateOrderClick);
+        var closeOrderFormButton = popupView.getCloseOrderFormButton();
+        closeOrderFormButton.addEventListener("click", this._onCloseOrderFormClick);
+    };
+    /**
+     * Creates a window for creating a product.
+     *
+     * @private
+     */
+    this._onOpenProductFormClick = function () {
+        popupView.displayProductWindow(view.getBody());
+        var createProductButton = popupView.getCreateProductButton();
+        createProductButton.addEventListener("click", this._onCreateProductClick);
+        var closeProductFormButton = popupView.getCloseProductFormButton();
+        closeProductFormButton.addEventListener("click", this._onCloseProductFormClick);
+    };
+    /**
+     * Declares event handlers.
+     *
+     * @private
+     */
+    this._declareEventHandlers = function () {
+        var ordersNode = view.getOrdersNode();
+        var orderSearchButton = view.getOrderSearchButton();
+        var updateButton = view.getUpdateButton();
+        var truckButton = view.getTruckButton();
+        var clientButton = view.getClientButton();
+        var productSearchButton = view.getProductSearchButton();
+        var mapButton = view.getMapButton();
+        var deleteOrderButton = view.getDeleteOrderButton();
+        var editButton = view.getEditButton();
+        var saveButton = view.getSaveButton();
+        var productList = view.getProductList();
+        var headOfProductList = view.getHeadOfProductList();
+        var openOrderFormButton = view.getOpenOrderFormButton();
+        var openProductFormButton = view.getOpenProductFormButton();
+
+        orderSearchButton.addEventListener("click", this._onOrderSearchClick);
+        updateButton.addEventListener("click", this._onUpdateClick);
+        ordersNode.addEventListener("click", this._onOrdersNodeClick);
+        truckButton.addEventListener("click", this._onAddressInfoClick);
+        clientButton.addEventListener("click", this._onClientInfoClick);
+        mapButton.addEventListener("click", this._onMapClick);
+        deleteOrderButton.addEventListener("click", this._onDeleteOrderClick);
+        productSearchButton.addEventListener("click", this._onProductSearchClick);
+        editButton.addEventListener("click", this._onEditClick);
+        saveButton.addEventListener("click", this._onSaveClick);
+        productList.addEventListener("click", this._onDeleteProductClick);
+        headOfProductList.addEventListener("click", this._onSortClick);
+        openOrderFormButton.addEventListener("click", this._onOpenOrderFormClick.bind(this));
+        openProductFormButton.addEventListener("click", this._onOpenProductFormClick.bind(this));
+
+    };
+
+}
+
+/**
  * Model class. Knows everything about API endpoint and data structure. Can format/map data to any structure.
  *
  * @constructor
@@ -56,9 +506,9 @@ function Model() {
     /**
      * Common method which "promisifies" the XHR calls.
      *
-     * @param {String} method the HTTP method name string.
-     * @param {String} url the URL address to request.
-     * @param {String} data a JSON string.
+     * @param {string} method the HTTP method name string.
+     * @param {string} url the URL address to request.
+     * @param {string} data a JSON string.
      *
      * @return {Promise} the promise object will be resolved once XHR gets loaded/failed.
      *
@@ -100,11 +550,7 @@ function Model() {
      * @public
      */
     this.fetchOrders = function () {
-        return this
-            .request("GET", _apiPrefix, null)
-            .then(function (orders) {
-                return orders;
-            });
+        return this.request("GET", _apiPrefix, null)
     };
     /**
      * Fetches an order.
@@ -114,11 +560,7 @@ function Model() {
      * @public
      */
     this.fetchOrder = function (orderId) {
-        return this
-            .request("GET", _orderURLTemplate.replace("{ORDER}", orderId), null)
-            .then(function (order) {
-                return order;
-            });
+        return this.request("GET", _orderURLTemplate.replace("{ORDER}", orderId), null);
     };
     /**
      * Fetches products of one order.
@@ -128,55 +570,50 @@ function Model() {
      * @public
      */
     this.fetchProducts = function (orderId) {
-        return this
-            .request("GET", _productsURLTemplate.replace("{ORDER}", orderId), null)
-            .then(function (products) {
-                return products;
-            })
-
+        return this.request("GET", _productsURLTemplate.replace("{ORDER}", orderId), null)
     };
     /**
      * Makes a request for the addition of an order.
      *
-     * @param {String} order a JSON string to be sent.
+     * @param {string} order a JSON string to be sent.
      *
      * @returns {Promise} the promise object will be resolved once sending the JSON string.
      *
      * @public
      */
-    this.sendOrder = function (order) {
+    this.createOrder = function (order) {
         return this.request("POST", _apiPrefix, order);
     };
     /**
      * Makes a request for the addition of an product.
      *
-     * @param {String} orderId id of order string.
-     * @param {String} product a JSON string to be sent.
+     * @param {string} orderId id of order string.
+     * @param {string} product a JSON string to be sent.
      *
      * @returns {Promise} the promise object will be resolved once sending the JSON string.
      *
      * @public
      */
-    this.sendProduct = function (orderId, product) {
+    this.createProduct = function (orderId, product) {
         return this.request("POST", _productsURLTemplate.replace("{ORDER}", orderId), product);
     };
     /**
      * Make a request to change order info.
      *
-     * @param {String} orderId id of order string.
-     * @param {String} newInfo a JSON string to be sent.
+     * @param {string} orderId id of order string.
+     * @param {string} newInfo a JSON string to be sent.
      *
      * @returns {Promise} the promise object will be resolved once sending the JSON string.
      *
      * @public
      */
-    this.putEditData = function (orderId, newInfo) {
+    this.changeOrderInfo = function (orderId, newInfo) {
         return this.request("PUT", _orderURLTemplate.replace("{ORDER}", orderId), newInfo);
     };
     /**
      * Makes a request to delete an order.
      *
-     * @param {String} orderId id of order string.
+     * @param {string} orderId id of order string.
      *
      * @returns {Promise} the promise object will be resolved once deletion of order.
      *
@@ -188,8 +625,8 @@ function Model() {
     /**
      * Makes a request to delete a product.
      *
-     * @param {String} productId id of product string.
-     * @param {String} orderId id of order string.
+     * @param {string} productId id of product string.
+     * @param {string} orderId id of order string.
      *
      * @returns {Promise} the promise object will be resolved once deletion of product.
      *
@@ -201,14 +638,14 @@ function Model() {
     /**
      * Processes and converts product data to JSON string .
      *
-     * @param {String} orderId the order id string.
-     * @param {Array} productData array of product data.
+     * @param {string} orderId the order id string.
+     * @param {string[]} productData array of product data.
      *
-     * @returns {String} a JSON string representing the given value.
+     * @returns {string} a JSON string representing the given value.
      *
      * @public
      */
-    this.handleProductData = function (orderId, productData) {
+    this.serializeProductData = function (orderId, productData) {
         var product = {
             "name": productData[0],
             "price": Number(productData[1]),
@@ -222,13 +659,13 @@ function Model() {
     /**
      * Processes and converts order data to JSON string .
      *
-     * @param {Array} orderData array of order data.
+     * @param {string[]} orderData array of order data.
      *
-     * @returns {String} a JSON string representing the given value.
+     * @returns {string} a JSON string representing the given value.
      *
      * @public
      */
-    this.handleOrderData = function (orderData) {
+    this.serializeOrderData = function (orderData) {
         var order = {
             "summary": {
                 "createdAt": new Date(),
@@ -259,13 +696,13 @@ function Model() {
     /**
      * Processes and converts client data to JSON string .
      *
-     * @param {Array} clientData array of client data.
+     * @param {string[]} clientData array of client data.
      *
-     * @returns {String} a JSON string representing the given value.
+     * @returns {string} a JSON string representing the given value.
      *
      * @public
      */
-    this.handleClientData = function (clientData) {
+    this.serializeClientData = function (clientData) {
         var client = {
             "customerInfo": {
                 "firstName": clientData[0],
@@ -281,13 +718,13 @@ function Model() {
     /**
      * Processes and converts address data to JSON string .
      *
-     * @param {Array} addressData array of address data.
+     * @param {string[]} addressData array of address data.
      *
-     * @returns {String} a JSON string representing the given value.
+     * @returns {string} a JSON string representing the given value.
      *
      * @public
      */
-    this.handleAddressData = function (addressData) {
+    this.serializeAddressData = function (addressData) {
         var address = {
             "shipTo": {
                 "name": addressData[0],
@@ -302,9 +739,9 @@ function Model() {
     /**
      * Receives a map with required coordinates.
      *
-     * @param {String} street street name string.
-     * @param {String} region region name string.
-     * @param {String} country country name string.
+     * @param {string} street street name string.
+     * @param {string} region region name string.
+     * @param {string} country country name string.
      *
      * @public
      */
@@ -329,16 +766,16 @@ function Model() {
     /**
      * Checks for empty strings presence in form values.
      *
-     * @param {Array} values array of values from form.
+     * @param {string[]} values array of values from form.
      *
-     * @returns {Boolean} returns boolean.
+     * @returns {boolean} returns boolean.
      *
      * @public
      */
     this.checkFormValues = function (values) {
 
         for (var i = 0; i &lt; values.length; i++) {
-            if (values[i] === "" || values[i] === " ") {
+            if (values[i].trim().length === 0) {
                 return true;
             }
         }
@@ -347,9 +784,9 @@ function Model() {
     /**
      * Finds input numbers with flaws.
      *
-     * @param {Array} values array of values from form.
+     * @param {string[]} values array of values from form.
      *
-     * @returns {Array} returns array of flaw number.
+     * @returns {number[]} returns array of flaw number.
      *
      * @public
      */
@@ -367,10 +804,10 @@ function Model() {
     /**
      * Selects appropriate orders.
      *
-     * @param {Array} orders array of orders.
-     * @param {String} value the value of string in input.
+     * @param {Object[]} orders array of orders.
+     * @param {string} value the value of string in input.
      *
-     * @returns {Array} returns the array of appropriate orders.
+     * @returns {Object[]} returns the array of appropriate orders.
      *
      * @public
      */
@@ -394,10 +831,10 @@ function Model() {
     /**
      * Selects appropriate products.
      *
-     * @param {Array} products array of products.
-     * @param {String} value the value of string in input.
+     * @param {Object[]} products array of products.
+     * @param {string} value the value of string in input.
      *
-     * @returns {Array} returns the array of appropriate products.
+     * @returns {Object[]} returns the array of appropriate products.
      *
      * @public
      */
@@ -417,12 +854,12 @@ function Model() {
     /**
      * Sorts products.
      *
-     * @param {Array} products array of products.
-     * @param {String} property product property string by which the products will be sorted.
-     * @param {String} type string of the type of the value to be sorted.
-     * @param {String} orderOf sort order name string.
+     * @param {Object[]} products array of products.
+     * @param {string} property product property string by which the products will be sorted.
+     * @param {string} type string of the type of the value to be sorted.
+     * @param {string} orderOf sort order name string.
      *
-     * @returns {Array} returns sorted array of products.
+     * @returns {Object[]} returns sorted array of products.
      *
      * @public
      */
@@ -566,46 +1003,6 @@ function View() {
         return document.querySelector("#productSearchButton");
     };
     /**
-     * Returns the create product button.
-     *
-     * @returns {Element} the HTMLAnchorElement.
-     *
-     * @public
-     */
-    this.getCreateProductButton = function () {
-        return document.querySelector("#createProductButton");
-    };
-    /**
-     * Returns the create order button.
-     *
-     * @returns {Element} the HTMLAnchorElement.
-     *
-     * @public
-     */
-    this.getCreateOrderButton = function () {
-        return document.querySelector("#createOrderButton");
-    };
-    /**
-     * Returns the close product form button.
-     *
-     * @returns {Element} the HTMLAnchorElement.
-     *
-     * @public
-     */
-    this.getCloseProductFormButton = function () {
-        return document.querySelector("#closeProductForm");
-    };
-    /**
-     * Returns the close order form button.
-     *
-     * @returns {Element} the HTMLAnchorElement.
-     *
-     * @public
-     */
-    this.getCloseOrderFormButton = function () {
-        return document.querySelector("#closeOrderForm");
-    };
-    /**
      * Returns the order list.
      *
      * @returns {Element} the HTMLElement.
@@ -666,26 +1063,6 @@ function View() {
         return document.querySelector("#searchProduct");
     };
     /**
-     * Returns the product creation form.
-     *
-     * @returns {Element} the HTMLFormElement.
-     *
-     * @public
-     */
-    this.getProductCreationForm = function () {
-        return document.querySelector("#productForm");
-    };
-    /**
-     * Returns the order creation form.
-     *
-     * @returns {Element} the HTMLFormElement.
-     *
-     * @public
-     */
-    this.getOrderCreationForm = function () {
-        return document.querySelector("#orderForm");
-    };
-    /**
      * Returns the info form.
      *
      * @returns {Element} the HTMLFormElement.
@@ -700,11 +1077,11 @@ function View() {
      *
      * @param {Element} form the HTMLFormElement.
      *
-     * @returns {Array} the Array.
+     * @returns {string[]} the array of values from form.
      *
      * @public
      */
-    this.getValuesFromForm = function (form) {
+    this.getFormValues = function (form) {
         var arrOfValues = [];
         for (var i = 0; i &lt; form.length; i++) {
             arrOfValues.push(form[i].value);
@@ -714,17 +1091,17 @@ function View() {
     /**
      * Returns the id of selected order.
      *
-     * @returns {String} the String.
+     * @returns {string} the String.
      *
      * @public
      */
     this.getIdOfSelectedOrder = function () {
-        return document.querySelector("#orderId").innerText;
+        return document.querySelector("#orderId").getAttribute("data-id");
     };
     /**
      * Returns the id of info about order.
      *
-     * @returns {String} the String.
+     * @returns {string} the String.
      *
      * @public
      */
@@ -802,9 +1179,39 @@ function View() {
         return document.querySelector("#headRow");
     };
     /**
+     * Returns the open order creation window button.
+     *
+     * @returns {Element} the HTMLAnchorElement.
+     *
+     * @public
+     */
+    this.getOpenOrderFormButton = function () {
+        return document.querySelector("#openOrderCreationWindow");
+    };
+    /**
+     * Returns the open product creation window button.
+     *
+     * @returns {Element} the HTMLAnchorElement.
+     *
+     * @public
+     */
+    this.getOpenProductFormButton = function () {
+        return document.querySelector("#openProductCreationWindow");
+    };
+    /**
+     * Returns the body of page.
+     *
+     * @returns {Element} the HTMLAnchorElement.
+     *
+     * @public
+     */
+    this.getBody = function () {
+        return document.querySelector("#body");
+    };
+    /**
      * Displays side bar with orders.
      *
-     * @param {Array} orders the Array of orders.
+     * @param {Object[]} orders the array of orders.
      *
      * @public
      */
@@ -824,16 +1231,24 @@ function View() {
      */
     this.displayOrderInfo = function (order) {
         var orderInfoNode = this.getOrderTitleNode();
-        orderInfoNode.innerHTML = '&lt;div>' +
-            '&lt;h3>Order &lt;span class="numOfOrder" id="orderId">' + order.id + '&lt;/span>&lt;/h3>' +
-            '&lt;span class="customer">Customer: ' + order.summary.customer + '&lt;/span>' +
-            '&lt;span>Ordered: &lt;span>' + this.formatDate(order.summary.createdAt) + '&lt;/span>&lt;/span>' +
-            '&lt;span>Shipped: &lt;span>' + this.formatDate(order.summary.shippedAt) + '&lt;/span>&lt;/span>' +
-            '&lt;/div>' +
-            '&lt;div>' +
-            '&lt;span class="total-price">' + order.summary.totalPrice + '&lt;/span>' +
-            '&lt;span>' + order.summary.currency + '&lt;/span>' +
-            '&lt;/div>';
+        var link = document.querySelector("link[href*=orderInfo]");
+        var template = link.import.querySelector("#orderInfo");
+        var clone = document.importNode(template, true);
+
+        clone.innerHTML = clone.innerHTML.replace("{orderId}", order.id);
+        clone.innerHTML = clone.innerHTML.replace("{customer}", order.summary.customer);
+        clone.innerHTML = clone.innerHTML.replace("{createdAt}", this.formatDate(order.summary.createdAt));
+        clone.innerHTML = clone.innerHTML.replace("{shippedAt}", this.formatDate(order.summary.shippedAt));
+        clone.innerHTML = clone.innerHTML.replace("{totalPrice}", order.summary.totalPrice);
+        clone.innerHTML = clone.innerHTML.replace("{currency}", order.summary.currency);
+
+        clone.children[0].children[0].children[0].setAttribute("data-id", order.id);
+
+        if (orderInfoNode.children[0]) {
+            orderInfoNode.replaceChild(clone, orderInfoNode.children[0]);
+        } else {
+            orderInfoNode.appendChild(clone);
+        }
     };
     /**
      * Displays shipping address of order.
@@ -843,23 +1258,21 @@ function View() {
      * @public
      */
     this.displayShipTo = function (order) {
-
         var shipToNode = this.getInfoAboutOrderNode();
-        var div = document.createElement("div");
-        div.id = "address";
-        div.innerHTML = '&lt;h3>Shipping address&lt;/h3>' +
-            '&lt;form id="infoForm" class="edit-form">' +
-            '&lt;p>&lt;label>Name: &lt;/label>&lt;span>' + order.shipTo.name + '&lt;/span>&lt;/p>' +
-            '&lt;p>&lt;label>Street: &lt;/label>&lt;span>' + order.shipTo.address + '&lt;/span>&lt;/p>' +
-            '&lt;p>&lt;label>ZIP Code/City: &lt;/label>&lt;span>' + order.shipTo.ZIP + '&lt;/span>&lt;/p>' +
-            '&lt;p>&lt;label>Region: &lt;/label>&lt;span>' + order.shipTo.region + '&lt;/span>&lt;/p>' +
-            '&lt;p>&lt;label>Country: &lt;/label>&lt;span>' + order.shipTo.country + '&lt;/span>&lt;/p>' +
-            '&lt;/form>';
+        var link = document.querySelector("link[href*=shipInfoForm]");
+        var template = link.import.querySelector("#address");
+        var clone = document.importNode(template, true);
+
+        clone.innerHTML = clone.innerHTML.replace("{name}", order.shipTo.name);
+        clone.innerHTML = clone.innerHTML.replace("{address}", order.shipTo.address);
+        clone.innerHTML = clone.innerHTML.replace("{ZIP}", order.shipTo.ZIP);
+        clone.innerHTML = clone.innerHTML.replace("{region}", order.shipTo.region);
+        clone.innerHTML = clone.innerHTML.replace("{country}", order.shipTo.country);
 
         if (shipToNode.children.length === 1) {
-            shipToNode.insertBefore(div, shipToNode.children[0])
+            shipToNode.insertBefore(clone, shipToNode.children[0])
         } else {
-            shipToNode.replaceChild(div, shipToNode.children[0]);
+            shipToNode.replaceChild(clone, shipToNode.children[0]);
         }
         this.toggleButtons("truckButton");
 
@@ -867,7 +1280,7 @@ function View() {
     /**
      * Displays products of order.
      *
-     * @param {Array} products the array of products.
+     * @param {Object[]} products the array of products.
      *
      * @public
      */
@@ -875,6 +1288,7 @@ function View() {
         this.getOrderHeader().classList.remove("invisibility");
         this.getMainNode().classList.remove("invisibility");
         this.getOrderWrapper().classList.remove("no-orders");
+
         var numOfProductsNode = this.getNumOfProducts();
         numOfProductsNode.innerHTML = String(products.length);
         var productsNode = this.getBodyOfProductList();
@@ -907,7 +1321,7 @@ function View() {
      * Displays all order info.
      *
      * @param {Object} order the order object.
-     * @param {Array} products the array of products.
+     * @param {Object[]} products the array of products.
      *
      * @public
      */
@@ -925,17 +1339,18 @@ function View() {
      */
     this.displayClientInfo = function (order) {
         var clientInfoNode = this.getInfoAboutOrderNode();
-        var div = document.createElement("div");
-        div.id = "client";
-        div.innerHTML = '&lt;h3>Client info&lt;/h3>' +
-            '&lt;form id="infoForm" class="edit-form">' +
-            '&lt;p>&lt;label>Name: &lt;/label>&lt;span>' + order.customerInfo.firstName + '&lt;/span>&lt;/p>' +
-            '&lt;p>&lt;label>Surname: &lt;/label>&lt;span>' + order.customerInfo.lastName + '&lt;/span>&lt;/p>' +
-            '&lt;p>&lt;label>Street: &lt;/label>&lt;span>' + order.customerInfo.address + '&lt;/span>&lt;/p>' +
-            '&lt;p>&lt;label>number: &lt;/label>&lt;span>' + order.customerInfo.phone + '&lt;/span>&lt;/p>' +
-            '&lt;p>&lt;label>email: &lt;/label>&lt;span>' + order.customerInfo.email + '&lt;/span>&lt;/p>' +
-            '&lt;/form>';
-        clientInfoNode.replaceChild(div, clientInfoNode.children[0]);
+        var link = document.querySelector("link[href*=clientInfoForm]");
+        var template = link.import.querySelector("#client");
+        var clone = document.importNode(template, true);
+
+        clone.innerHTML = clone.innerHTML.replace("{firstName}", order.customerInfo.firstName);
+        clone.innerHTML = clone.innerHTML.replace("{lastName}", order.customerInfo.lastName);
+        clone.innerHTML = clone.innerHTML.replace("{address}", order.customerInfo.address);
+        clone.innerHTML = clone.innerHTML.replace("{phone}", order.customerInfo.phone);
+        clone.innerHTML = clone.innerHTML.replace("{email}", order.customerInfo.email);
+
+        clientInfoNode.replaceChild(clone, clientInfoNode.children[0]);
+
         this.toggleButtons("clientButton");
     };
     /**
@@ -948,26 +1363,27 @@ function View() {
      * @public
      */
     this.createOrderItem = function (order) {
-        var orderItem = document.createElement("div");
-        orderItem.className = "order-item";
+        var link = document.querySelector("link[href*=orderItem]");
+        var template = link.import.querySelector(".order-item");
+        var orderItem = document.importNode(template, true);
         orderItem.id = order.id;
-        orderItem.innerHTML = '&lt;div>' +
-            '&lt;h3>Order &lt;span class="order-number">' + order.id + '&lt;/span>&lt;/h3>' +
-            '&lt;span class="customer">' + order.summary.customer + '&lt;/span>' +
-            '&lt;span>Shipped: &lt;span>' + this.formatDate(order.summary.shippedAt) + '&lt;/span>&lt;/span>' +
-            '&lt;/div>' +
-            '&lt;div>' +
-            '&lt;time>' + this.formatDate(order.summary.createdAt) + '&lt;/time>' +
-            '&lt;span class="status ' + this.paintStatus(order.summary.status) + '">' + order.summary.status + '&lt;/span>' +
-            '&lt;/div>';
+
+        orderItem.innerHTML = orderItem.innerHTML.replace("{orderId}", order.id);
+        orderItem.innerHTML = orderItem.innerHTML.replace("{customer}", order.summary.customer);
+        orderItem.innerHTML = orderItem.innerHTML.replace("{shippedAt}", this.formatDate(order.summary.shippedAt));
+        orderItem.innerHTML = orderItem.innerHTML.replace("{createdAt}", this.formatDate(order.summary.createdAt));
+        orderItem.innerHTML = orderItem.innerHTML.replace("{status}", order.summary.status);
+
+        orderItem.children[1].children[1].classList.add(this.highlightStatus(order.summary.status));
+
         return orderItem;
     };
     /**
      * Formats the date
      *
-     * @param {String} date the date string.
+     * @param {string} date the date string.
      *
-     * @returns {String} the date string.
+     * @returns {string} the date string.
      *
      * @public
      */
@@ -976,22 +1392,24 @@ function View() {
         return formattedDate.getDate() + "." + (formattedDate.getMonth() + 1) + "." + formattedDate.getFullYear();
     };
     /**
-     * Adds class depending on value of status to properly paint status.
+     * Adds class, that highlights status depending on value of status.
      *
-     * @param {String} status the status string.
+     * @param {string} status the status string.
      *
-     * @returns {String} the css-class string.
+     * @returns {string} the css-class string.
      *
      * @public
      */
-    this.paintStatus = function (status) {
-        return (status === "pending") ? "pending" : "accepted";
+    this.highlightStatus = function (status) {
+        var pendingStstus = "pending",
+            acceptedStatus = "accepted";
+        return (status === pendingStstus) ? pendingStstus : acceptedStatus;
     };
     /**
      * Removes a class.
      *
-     * @param {String} nameOfClass the string of class name to be deleted.
-     * @param {String} elements the string of class name by which can find the elements.
+     * @param {string} nameOfClass the string of class name to be deleted.
+     * @param {string} elements the string of class name by which can find the elements.
      *
      * @public
      */
@@ -1004,7 +1422,7 @@ function View() {
     /**
      * Switches classes to display truck, client and map buttons correctly.
      *
-     * @param {String} button the active button name string.
+     * @param {string} button the active button name string.
      *
      * @public
      */
@@ -1034,24 +1452,11 @@ function View() {
 
     };
     /**
-     * Removes values ​​from form.
-     *
-     * @param {Element} form the HTMLFormElement.
+     * Adds class, that highlights the selected order.
      *
      * @public
      */
-    this.clearForm = function (form) {
-        for (var i = 0; i &lt; form.length - 1; i++) {
-            form[i].value = "";
-            form[i].classList.remove("flaw");
-        }
-    };
-    /**
-     * Adds class to the selected order.
-     *
-     * @public
-     */
-    this.paintOrder = function () {
+    this.highlightOrder = function () {
         var id = this.getIdOfSelectedOrder();
         var selectedOrder = Array.from(this.getOrdersNode().children).filter(function (order) {
             return order.id === id;
@@ -1061,7 +1466,7 @@ function View() {
     /**
      * Correctly displays buttons depending on conditions.
      *
-     * @param {String} button the button name string.
+     * @param {string} button the button name string.
      *
      * @public
      */
@@ -1130,7 +1535,7 @@ function View() {
      * Adds a class.
      *
      * @param {Element} element the HTMLDivElement.
-     * @param {String} nameOfClass the class name string.
+     * @param {string} nameOfClass the class name string.
      *
      * @public
      */
@@ -1152,20 +1557,20 @@ function View() {
     /**
      * Shows what needs to be filled in the form.
      *
-     * @param {Array} flawNumbers array of flaw numbers.
-     * @param {Element} form the HTMLFormElement.
+     * @param {number[]} flawNumbers array of flaw numbers.
+     * @param {Element} formElement the HTMLFormElement.
      *
      * @public
      */
-    this.reportFlaws = function (flawNumbers, form) {
-        for (var i = 0; i &lt; form.length; i++) {
-            form[i].classList.remove("flaw");
+    this.reportFlaws = function (flawNumbers, formElement) {
+        for (var i = 0; i &lt; formElement.length; i++) {
+            formElement[i].classList.remove("flaw");
         }
         for (var i = 0; i &lt; flawNumbers.length; i++) {
 
-            form[flawNumbers[i]].classList.add("flaw");
-            if (form.classList.contains("edit-form")) {
-                form[flawNumbers[i]].placeholder = "Fill me";
+            formElement[flawNumbers[i]].classList.add("flaw");
+            if (formElement.classList.contains("edit-form")) {
+                formElement[flawNumbers[i]].placeholder = "Fill me";
             }
         }
     };
@@ -1192,8 +1597,8 @@ function View() {
         var arrOfTh = this.getHeadRow().children;
 
         for (var i = 0; i &lt; arrOfTh.length; i++) {
-            for (var j = 0; j &lt; arrOfTh[i].children.length; j++){
-                if (arrOfTh[i].children[j].classList.contains("sorted-by")){
+            for (var j = 0; j &lt; arrOfTh[i].children.length; j++) {
+                if (arrOfTh[i].children[j].classList.contains("sorted-by")) {
                     sortedBy = arrOfTh[i].children[j];
                     break;
                 }
@@ -1209,7 +1614,7 @@ function View() {
      *
      *@param {Element} element the HTMLElement from which the setting values ​​will be taken.
      *
-     * @returns {Array} returns array of sort settings.
+     * @returns {string[]} returns array of sort settings.
      *
      * @public
      */
@@ -1232,7 +1637,7 @@ function View() {
 
         options.push(element.parentElement.getAttribute("data-type"));
 
-        if(element.classList.contains("fa-caret-down")){
+        if (element.classList.contains("fa-caret-down")) {
             options.push("descending");
         } else {
             options.push("ascending");
@@ -1240,449 +1645,160 @@ function View() {
 
         return options;
     };
-    /**
-     * Converts table rows to product objects
-     *
-     * @returns {Array} returns array of products.
-     *
-     * @public
-     */
-    this.getProductsFromTable = function () {
-        var table = this.getBodyOfProductList();
-        var arrOfRows = Array.prototype.slice.call(table.rows);
-        return arrOfRows.map(function (element) {
-            return {
-                "name" : element.children[0].children[0].innerText,
-                "price": element.children[1].children[0].innerText,
-                "currency": element.children[1].children[1].innerText,
-                "quantity": element.children[2].innerText,
-                "totalPrice": element.children[3].children[0].innerText,
-                "id": element.children[0].children[1].innerText
-            }
-        });
-    };
+
 }
 
 /**
- * Controller class. Orchestrates the model and view objects. A "glue" between them.
- *
- * @param {View} view view instance.
- * @param {Model} model model instance.
+ * PopupView class. Knows everything about dom &amp; manipulation connected with popups and a little bit about data structure, which should be
+ * filled into UI element.
  *
  * @constructor
  */
-function Controller(view, model) {
+function PopupView() {
 
     /**
-     * Initialize controller.
+     * Displays a window for creating an order.
+     *
+     * @param {Element} body thw HTMLElement in which the window will be inserted.
      *
      * @public
      */
-    this.init = function () {
+    this.displayOrderWindow = function (body) {
+        var link = document.querySelector("link[href*=orderCreationWindow]");
+        var template = link.import.querySelector("#orderWindow");
+        var clone = document.importNode(template, true);
 
-        this._onUpdateClick();
-
-        var ordersNode = view.getOrdersNode();
-        var orderSearchButton = view.getOrderSearchButton();
-        var updateButton = view.getUpdateButton();
-        var truckButton = view.getTruckButton();
-        var clientButton = view.getClientButton();
-        var productSearchButton = view.getProductSearchButton();
-        var mapButton = view.getMapButton();
-        var createProductButton = view.getCreateProductButton();
-        var deleteOrderButton = view.getDeleteOrderButton();
-        var createOrderButton = view.getCreateOrderButton();
-        var editButton = view.getEditButton();
-        var saveButton = view.getSaveButton();
-        var productList = view.getProductList();
-        var headOfProductList = view.getHeadOfProductList();
-        var closeProductFormButton = view.getCloseProductFormButton();
-        var closeOrderFormButton = view.getCloseOrderFormButton();
-
-        orderSearchButton.addEventListener("click", this._onOrderSearchClick);
-        updateButton.addEventListener("click", this._onUpdateClick);
-        ordersNode.addEventListener("click", this._onOrdersNodeClick);
-        truckButton.addEventListener("click", this._onTruckClick);
-        clientButton.addEventListener("click", this._onClientClick);
-        mapButton.addEventListener("click", this._onMapClick);
-        createProductButton.addEventListener("click", this._onCreateProductClick);
-        deleteOrderButton.addEventListener("click", this._onDeleteOrderClick);
-        createOrderButton.addEventListener("click", this._onCreateOrderClick);
-        productSearchButton.addEventListener("click", this._onProductSearchClick);
-        editButton.addEventListener("click", this._onEditClick);
-        saveButton.addEventListener("click", this._onSaveClick);
-        productList.addEventListener("click", this._onDeleteProductClick);
-        headOfProductList.addEventListener("click", this._onSortClick);
-        closeOrderFormButton.addEventListener("click", this._onCloseOrderFormClick);
-        closeProductFormButton.addEventListener("click", this._onCloseProductFormClick);
-
-    };
-
-    /**
-     * Searches for an order, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onOrderSearchClick = function () {
-        model
-            .fetchOrders()
-            .then(function (orders) {
-                var orderSearchInput = view.getOrderSearchInput();
-                view.displaySideBar(model.searchOrder(orders, orderSearchInput.value));
-            });
+        body.insertBefore(clone, body.children[0])
     };
     /**
-     * Updates order list, button click event handler.
+     * Displays a window for creating a product.
      *
-     * @listens click
+     * @param {Element} body thw HTMLElement in which the window will be inserted.
      *
-     * @private
+     * @public
      */
-    this._onUpdateClick = function () {
-        model
-            .fetchOrders()
-            .then(function (orders) {
-                if (orders.length) {
-                    model
-                        .fetchProducts(orders[0].id)
-                        .then(function (products) {
-                            view.displaySideBar(orders);
-                            view.displayOrder(orders[0], products);
-                            view.selectFirstOrder();
-                            view.toggleClasses("truckButton");
-                        });
-                } else {
-                    view.reportThereNoOrders();
-                }
-            });
+    this.displayProductWindow = function (body) {
+        var link = document.querySelector("link[href*=productCreationWindow]");
+        var template = link.import.querySelector("#productWindow");
+        var clone = document.importNode(template, true);
 
+        body.insertBefore(clone, body.children[0])
     };
     /**
-     * Shows details of selected order, button click event handler.
+     * Deletes a window for creating an order.
      *
-     * @listens click
-     *
-     * @param {Event} event the DOM event object.
-     *
-     * @private
+     * @public
      */
-    this._onOrdersNodeClick = function (event) {
-        var selectedOrder = Array.from(event.path).filter(function (item, index) {
-            if (index &lt; 5) {
-                return item.classList.contains("order-item");
+    this.deleteOrderWindow = function (body) {
+        body.removeChild(document.querySelector("#orderWindow"));
+    };
+    /**
+     * Deletes a window for creating a product.
+     *
+     * @public
+     */
+    this.deleteProductWindow = function (body) {
+        body.removeChild(document.querySelector("#productWindow"));
+    };
+    /**
+     * Returns the close order form button.
+     *
+     * @returns {Element} the HTMLAnchorElement.
+     *
+     * @public
+     */
+    this.getCloseOrderFormButton = function () {
+        return document.querySelector("#closeOrderCreationWindow");
+    };
+    /**
+     * Returns the close product form button.
+     *
+     * @returns {Element} the HTMLAnchorElement.
+     *
+     * @public
+     */
+    this.getCloseProductFormButton = function () {
+        return document.querySelector("#closeProductCreationWindow");
+    };
+    /**
+     * Returns the product creation form.
+     *
+     * @returns {Element} the HTMLFormElement.
+     *
+     * @public
+     */
+    this.getProductCreationForm = function () {
+        return document.querySelector("#productForm");
+    };
+    /**
+     * Returns the order creation form.
+     *
+     * @returns {Element} the HTMLFormElement.
+     *
+     * @public
+     */
+    this.getOrderCreationForm = function () {
+        return document.querySelector("#orderForm");
+    };
+    /**
+     * Returns the create order button.
+     *
+     * @returns {Element} the HTMLAnchorElement.
+     *
+     * @public
+     */
+    this.getCreateOrderButton = function () {
+        return document.querySelector("#createOrderButton");
+    };
+    /**
+     * Returns the create product button.
+     *
+     * @returns {Element} the HTMLAnchorElement.
+     *
+     * @public
+     */
+    this.getCreateProductButton = function () {
+        return document.querySelector("#createProductButton");
+    };
+    /**
+     * Returns the array of values from form.
+     *
+     * @param {Element} form the HTMLFormElement.
+     *
+     * @returns {string[]} the array of values from form.
+     *
+     * @public
+     */
+    this.getFormValues = function (form) {
+        var arrOfValues = [];
+        for (var i = 0; i &lt; form.length; i++) {
+            arrOfValues.push(form[i].value);
+        }
+        return arrOfValues;
+    };
+    /**
+     * Shows what needs to be filled in the form.
+     *
+     * @param {number[]} flawNumbers array of flaw numbers.
+     * @param {Element} formElement the HTMLFormElement.
+     *
+     * @public
+     */
+    this.reportFlaws = function (flawNumbers, formElement) {
+        for (var i = 0; i &lt; formElement.length; i++) {
+            formElement[i].classList.remove("flaw");
+        }
+        for (var i = 0; i &lt; flawNumbers.length; i++) {
+
+            formElement[flawNumbers[i]].classList.add("flaw");
+            if (formElement.classList.contains("edit-form")) {
+                formElement[flawNumbers[i]].placeholder = "Fill me";
             }
-            return false;
-        });
-        if (selectedOrder) {
-            view.removeClass("selected-order", ".order-item");
-            view.addClass(selectedOrder[0], "selected-order");
-            model
-                .fetchOrder(selectedOrder[0].id)
-                .then(function (order) {
-                    model
-                        .fetchProducts(selectedOrder[0].id)
-                        .then(function (products) {
-                            view.displayOrder(order, products);
-                            view.toggleClasses("truckButton");
-                        });
-                });
         }
     };
-    /**
-     * Shows shipping address, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onTruckClick = function () {
-        var orderId = view.getIdOfSelectedOrder();
-        model
-            .fetchOrder(orderId)
-            .then(function (order) {
-                view.displayShipTo(order);
-                view.toggleClasses("truckButton");
-            });
-    };
-    /**
-     * Shows info about client, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onClientClick = function () {
-        var orderId = view.getIdOfSelectedOrder();
-        model
-            .fetchOrder(orderId)
-            .then(function (order) {
-                view.displayClientInfo(order);
-                view.toggleClasses("clientButton")
-            });
-    };
-    /**
-     * Shows address on map, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onMapClick = function () {
-        model
-            .fetchOrder(view.getIdOfSelectedOrder())
-            .then(function (order) {
-                view.displayMap();
-                model.getMapWithCoordinates(order.shipTo.address, order.shipTo.region, order.shipTo.country);
-                view.toggleClasses("mapButton");
-            });
-    };
-    /**
-     * Creates a product, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onCreateProductClick = function () {
-        var form = view.getProductCreationForm();
-        var values = view.getValuesFromForm(form);
-
-        if (model.checkFormValues(values)) {
-            var flawNumbers = model.findFlaws(values);
-            view.reportFlaws(flawNumbers, form);
-        } else {
-            var orderId = view.getIdOfSelectedOrder();
-            var product = model.handleProductData(orderId, values);
-            model
-                .sendProduct(orderId, product)
-                .then(function () {
-                    model
-                        .fetchProducts(orderId)
-                        .then(function (products) {
-                            view.displayProducts(products);
-                            view.getCloseProductFormButton().click();
-                            view.clearForm(view.getProductCreationForm());
-                        });
-                });
-        }
-    };
-    /**
-     * Creates an order, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onCreateOrderClick = function () {
-        var form = view.getOrderCreationForm();
-        var values = view.getValuesFromForm(form);
-
-        if (model.checkFormValues(values)) {
-            var flawNumbers = model.findFlaws(values);
-            view.reportFlaws(flawNumbers, form);
-        } else {
-            var order = model.handleOrderData(values);
-            model
-                .sendOrder(order)
-                .then(function () {
-                    model
-                        .fetchOrders()
-                        .then(function (orders) {
-                            if (orders.length === 1) {
-                                model
-                                    .fetchProducts(orders[0].id)
-                                    .then(function (products) {
-                                        view.displaySideBar(orders);
-                                        view.displayOrder(orders[0], products);
-                                        view.paintOrder();
-                                    })
-                            } else {
-                                view.displaySideBar(orders);
-                                view.paintOrder();
-                            }
-                            view.getCloseOrderFormButton().click();
-                            view.clearForm(view.getOrderCreationForm());
-                        });
-                });
-        }
-    };
-    /**
-     * Deletes an order, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onDeleteOrderClick = function () {
-        var orderId = view.getIdOfSelectedOrder();
-        model
-            .deleteOrder(orderId)
-            .then(function () {
-                model
-                    .fetchOrders()
-                    .then(function (orders) {
-                        if (orders.length) {
-                            model
-                                .fetchProducts(orders[0].id)
-                                .then(function (products) {
-                                    view.displaySideBar(orders);
-                                    view.displayOrder(orders[0], products);
-                                    view.selectFirstOrder();
-                                });
-                        } else {
-                            view.displaySideBar(orders);
-                            view.reportThereNoOrders();
-
-                        }
-                    });
-            });
-    };
-    /**
-     * Deletes a product, button click event handler.
-     *
-     * @listens click
-     *
-     * @param {Event} event the DOM event object.
-     *
-     * @private
-     */
-    this._onDeleteProductClick = function (event) {
-        if (event.target.classList.contains("deleteProduct")) {
-            var productId = event.target.id;
-            var orderId = view.getIdOfSelectedOrder();
-            model.deleteProduct(productId, orderId);
-            model
-                .fetchOrder(orderId)
-                .then(function (order) {
-                    model
-                        .fetchProducts(orderId)
-                        .then(function (products) {
-                            view.displayOrder(order, products);
-                        });
-                });
-        }
-    };
-    /**
-     * Makes info editable, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onEditClick = function () {
-        view.changeButtons(view.getSaveButton(), view.getEditButton());
-        view.makeDataEditable();
-    };
-    /**
-     * Saves changed info, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onSaveClick = function () {
-        var orderId = view.getIdOfSelectedOrder();
-        var newInfo;
-        var form = view.getInfoForm();
-        var idOfInfoOrder = view.getIdOfInfoAboutOrder();
-        var values = view.getValuesFromForm(form);
-
-
-        if (model.checkFormValues(values)) {
-            var flawNumbers = model.findFlaws(values);
-            view.reportFlaws(flawNumbers, form);
-        } else {
-            if (idOfInfoOrder === "address") {
-                newInfo = model.handleAddressData(values);
-            } else {
-                newInfo = model.handleClientData(values);
-            }
-
-            model
-                .putEditData(orderId, newInfo)
-                .then(function () {
-                    model
-                        .fetchOrder(orderId)
-                        .then(function (order) {
-                            model.fetchProducts(orderId)
-                                .then(function (products) {
-                                    view.displayOrder(order, products);
-                                    view.changeButtons(view.getEditButton(), view.getSaveButton());
-                                    if (idOfInfoOrder === "client") {
-                                        view.displayClientInfo(order);
-                                    }
-                                });
-                        });
-                });
-        }
-    };
-    /**
-     * Clears form fields when closing, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onCloseProductFormClick = function () {
-        view.clearForm(view.getProductCreationForm());
-    };
-    /**
-     * Clears form fields when closing, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onCloseOrderFormClick = function () {
-        view.clearForm(view.getOrderCreationForm());
-    };
-    /**
-     * Sorts products, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onSortClick = function (event) {
-        if (event.target.classList.contains("fa-caret-up") || event.target.classList.contains("fa-caret-down")) {
-
-            view.removeClass("sorted-by", ".fas");
-            var options = view.defineSortingOptions(event.target);
-            view.displayProducts(model.sortProducts(view.getProductsFromTable(), options[0], options[1], options[2]));
-            event.target.classList.add("sorted-by");
-
-        }
-    };
-    /**
-     * Searches for a product, button click event handler.
-     *
-     * @listens click
-     *
-     * @private
-     */
-    this._onProductSearchClick = function () {
-        model
-            .fetchProducts(view.getIdOfSelectedOrder())
-            .then(function (products) {
-                var productSearchInput = view.getProductSearchInput();
-                var rightProducts = model.searchProducts(products, productSearchInput.value);
-                var sortItem = view.checkSortIsOn();
-
-                if (sortItem != null) {
-                    var options = view.defineSortingOptions(sortItem);
-                    view.displayProducts(model.sortProducts(rightProducts, options[0], options[1], options[2]));
-                } else {
-                    view.displayProducts(model.searchProducts(products, productSearchInput.value));
-                }
-            });
-    };
-
 
 }
-
-(new Controller(new View, new Model)).init();</code></pre>
+</code></pre>
         </article>
     </section>
 
@@ -1692,13 +1808,13 @@ function Controller(view, model) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Controller.html">Controller</a></li><li><a href="Model.html">Model</a></li><li><a href="View.html">View</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Controller.html">Controller</a></li><li><a href="Model.html">Model</a></li><li><a href="PopupView.html">PopupView</a></li><li><a href="View.html">View</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Jun 15 2018 11:14:59 GMT+0300 (Беларусь (зима))
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jun 25 2018 13:15:28 GMT+0300 (Беларусь (зима))
 </footer>
 
 <script> prettyPrint(); </script>

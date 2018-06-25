@@ -1,0 +1,19 @@
+<div id="orderWindow">
+    <a href="#" class="overlay" id="orderCreationWindow"></a>
+    <div class="popup">
+        <div class="header"> CREATE ORDER</div>
+        <form id="orderForm" class="form" onsubmit="return false">
+            <input name="customer" type="text" class="info-input" placeholder="Customer" required>
+            <input name="full name" type="text" class="info-input" placeholder="Name and surname" required>
+            <input name="phone" type="tel" class="info-input" placeholder="Phone" required>
+            <input name="email" type="email" class="info-input" placeholder="Email" required>
+            <input name="address" type="text" class="info-input" placeholder="Address" required>
+            <input name="zip" type="text" class="info-input" placeholder="ZIP" required>
+            <input name="region" type="text" class="info-input" placeholder="Region" required>
+            <input name="country" type="text" class="info-input" placeholder="Country" required>
+            <input name="currency" type="text" class="info-input" placeholder="Currency" required>
+            <input id="createOrderButton" class="submit-button" type="submit" value="SUBMIT">
+        </form>
+        <a id="closeOrderCreationWindow" class="close" title="Close" href="#"></a>
+    </div>
+</div>

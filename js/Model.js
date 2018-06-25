@@ -28,9 +28,9 @@ function Model() {
     /**
      * Common method which "promisifies" the XHR calls.
      *
-     * @param {String} method the HTTP method name string.
-     * @param {String} url the URL address to request.
-     * @param {String} data a JSON string.
+     * @param {string} method the HTTP method name string.
+     * @param {string} url the URL address to request.
+     * @param {string} data a JSON string.
      *
      * @return {Promise} the promise object will be resolved once XHR gets loaded/failed.
      *
@@ -72,11 +72,7 @@ function Model() {
      * @public
      */
     this.fetchOrders = function () {
-        return this
-            .request("GET", _apiPrefix, null)
-            .then(function (orders) {
-                return orders;
-            });
+        return this.request("GET", _apiPrefix, null)
     };
     /**
      * Fetches an order.
@@ -86,11 +82,7 @@ function Model() {
      * @public
      */
     this.fetchOrder = function (orderId) {
-        return this
-            .request("GET", _orderURLTemplate.replace("{ORDER}", orderId), null)
-            .then(function (order) {
-                return order;
-            });
+        return this.request("GET", _orderURLTemplate.replace("{ORDER}", orderId), null);
     };
     /**
      * Fetches products of one order.
@@ -100,55 +92,50 @@ function Model() {
      * @public
      */
     this.fetchProducts = function (orderId) {
-        return this
-            .request("GET", _productsURLTemplate.replace("{ORDER}", orderId), null)
-            .then(function (products) {
-                return products;
-            })
-
+        return this.request("GET", _productsURLTemplate.replace("{ORDER}", orderId), null)
     };
     /**
      * Makes a request for the addition of an order.
      *
-     * @param {String} order a JSON string to be sent.
+     * @param {string} order a JSON string to be sent.
      *
      * @returns {Promise} the promise object will be resolved once sending the JSON string.
      *
      * @public
      */
-    this.sendOrder = function (order) {
+    this.createOrder = function (order) {
         return this.request("POST", _apiPrefix, order);
     };
     /**
      * Makes a request for the addition of an product.
      *
-     * @param {String} orderId id of order string.
-     * @param {String} product a JSON string to be sent.
+     * @param {string} orderId id of order string.
+     * @param {string} product a JSON string to be sent.
      *
      * @returns {Promise} the promise object will be resolved once sending the JSON string.
      *
      * @public
      */
-    this.sendProduct = function (orderId, product) {
+    this.createProduct = function (orderId, product) {
         return this.request("POST", _productsURLTemplate.replace("{ORDER}", orderId), product);
     };
     /**
      * Make a request to change order info.
      *
-     * @param {String} orderId id of order string.
-     * @param {String} newInfo a JSON string to be sent.
+     * @param {string} orderId id of order string.
+     * @param {string} newInfo a JSON string to be sent.
      *
      * @returns {Promise} the promise object will be resolved once sending the JSON string.
      *
      * @public
      */
-    this.putEditData = function (orderId, newInfo) {
+    this.changeOrderInfo = function (orderId, newInfo) {
         return this.request("PUT", _orderURLTemplate.replace("{ORDER}", orderId), newInfo);
     };
     /**
      * Makes a request to delete an order.
      *
-     * @param {String} orderId id of order string.
+     * @param {string} orderId id of order string.
      *
      * @returns {Promise} the promise object will be resolved once deletion of order.
      *
@@ -160,8 +147,8 @@ function Model() {
     /**
      * Makes a request to delete a product.
      *
-     * @param {String} productId id of product string.
-     * @param {String} orderId id of order string.
+     * @param {string} productId id of product string.
+     * @param {string} orderId id of order string.
      *
      * @returns {Promise} the promise object will be resolved once deletion of product.
      *
@@ -173,14 +160,14 @@ function Model() {
     /**
      * Processes and converts product data to JSON string .
      *
-     * @param {String} orderId the order id string.
-     * @param {Array} productData array of product data.
+     * @param {string} orderId the order id string.
+     * @param {string[]} productData array of product data.
      *
-     * @returns {String} a JSON string representing the given value.
+     * @returns {string} a JSON string representing the given value.
      *
      * @public
      */
-    this.handleProductData = function (orderId, productData) {
+    this.serializeProductData = function (orderId, productData) {
         var product = {
             "name": productData[0],
             "price": Number(productData[1]),
@@ -194,13 +181,13 @@ function Model() {
     /**
      * Processes and converts order data to JSON string .
      *
-     * @param {Array} orderData array of order data.
+     * @param {string[]} orderData array of order data.
      *
-     * @returns {String} a JSON string representing the given value.
+     * @returns {string} a JSON string representing the given value.
      *
      * @public
      */
-    this.handleOrderData = function (orderData) {
+    this.serializeOrderData = function (orderData) {
         var order = {
             "summary": {
                 "createdAt": new Date(),
@@ -231,13 +218,13 @@ function Model() {
     /**
      * Processes and converts client data to JSON string .
      *
-     * @param {Array} clientData array of client data.
+     * @param {string[]} clientData array of client data.
      *
-     * @returns {String} a JSON string representing the given value.
+     * @returns {string} a JSON string representing the given value.
      *
      * @public
      */
-    this.handleClientData = function (clientData) {
+    this.serializeClientData = function (clientData) {
         var client = {
             "customerInfo": {
                 "firstName": clientData[0],
@@ -253,13 +240,13 @@ function Model() {
     /**
      * Processes and converts address data to JSON string .
      *
-     * @param {Array} addressData array of address data.
+     * @param {string[]} addressData array of address data.
      *
-     * @returns {String} a JSON string representing the given value.
+     * @returns {string} a JSON string representing the given value.
      *
      * @public
      */
-    this.handleAddressData = function (addressData) {
+    this.serializeAddressData = function (addressData) {
         var address = {
             "shipTo": {
                 "name": addressData[0],
@@ -274,9 +261,9 @@ function Model() {
     /**
      * Receives a map with required coordinates.
      *
-     * @param {String} street street name string.
-     * @param {String} region region name string.
-     * @param {String} country country name string.
+     * @param {string} street street name string.
+     * @param {string} region region name string.
+     * @param {string} country country name string.
      *
      * @public
      */
@@ -301,16 +288,16 @@ function Model() {
     /**
      * Checks for empty strings presence in form values.
      *
-     * @param {Array} values array of values from form.
+     * @param {string[]} values array of values from form.
      *
-     * @returns {Boolean} returns boolean.
+     * @returns {boolean} returns boolean.
      *
      * @public
      */
     this.checkFormValues = function (values) {
 
         for (var i = 0; i < values.length; i++) {
-            if (values[i] === "" || values[i] === " ") {
+            if (values[i].trim().length === 0) {
                 return true;
             }
         }
@@ -319,9 +306,9 @@ function Model() {
     /**
      * Finds input numbers with flaws.
      *
-     * @param {Array} values array of values from form.
+     * @param {string[]} values array of values from form.
      *
-     * @returns {Array} returns array of flaw number.
+     * @returns {number[]} returns array of flaw number.
      *
      * @public
      */
@@ -339,10 +326,10 @@ function Model() {
     /**
      * Selects appropriate orders.
      *
-     * @param {Array} orders array of orders.
-     * @param {String} value the value of string in input.
+     * @param {Object[]} orders array of orders.
+     * @param {string} value the value of string in input.
      *
-     * @returns {Array} returns the array of appropriate orders.
+     * @returns {Object[]} returns the array of appropriate orders.
      *
      * @public
      */
@@ -366,10 +353,10 @@ function Model() {
     /**
      * Selects appropriate products.
      *
-     * @param {Array} products array of products.
-     * @param {String} value the value of string in input.
+     * @param {Object[]} products array of products.
+     * @param {string} value the value of string in input.
      *
-     * @returns {Array} returns the array of appropriate products.
+     * @returns {Object[]} returns the array of appropriate products.
      *
      * @public
      */
@@ -389,12 +376,12 @@ function Model() {
     /**
      * Sorts products.
      *
-     * @param {Array} products array of products.
-     * @param {String} property product property string by which the products will be sorted.
-     * @param {String} type string of the type of the value to be sorted.
-     * @param {String} orderOf sort order name string.
+     * @param {Object[]} products array of products.
+     * @param {string} property product property string by which the products will be sorted.
+     * @param {string} type string of the type of the value to be sorted.
+     * @param {string} orderOf sort order name string.
      *
-     * @returns {Array} returns sorted array of products.
+     * @returns {Object[]} returns sorted array of products.
      *
      * @public
      */

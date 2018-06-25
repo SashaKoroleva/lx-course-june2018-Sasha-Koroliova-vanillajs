@@ -97,46 +97,6 @@ function View() {
         return document.querySelector("#productSearchButton");
     };
     /**
-     * Returns the create product button.
-     *
-     * @returns {Element} the HTMLAnchorElement.
-     *
-     * @public
-     */
-    this.getCreateProductButton = function () {
-        return document.querySelector("#createProductButton");
-    };
-    /**
-     * Returns the create order button.
-     *
-     * @returns {Element} the HTMLAnchorElement.
-     *
-     * @public
-     */
-    this.getCreateOrderButton = function () {
-        return document.querySelector("#createOrderButton");
-    };
-    /**
-     * Returns the close product form button.
-     *
-     * @returns {Element} the HTMLAnchorElement.
-     *
-     * @public
-     */
-    this.getCloseProductFormButton = function () {
-        return document.querySelector("#closeProductForm");
-    };
-    /**
-     * Returns the close order form button.
-     *
-     * @returns {Element} the HTMLAnchorElement.
-     *
-     * @public
-     */
-    this.getCloseOrderFormButton = function () {
-        return document.querySelector("#closeOrderForm");
-    };
-    /**
      * Returns the order list.
      *
      * @returns {Element} the HTMLElement.
@@ -197,26 +157,6 @@ function View() {
         return document.querySelector("#searchProduct");
     };
     /**
-     * Returns the product creation form.
-     *
-     * @returns {Element} the HTMLFormElement.
-     *
-     * @public
-     */
-    this.getProductCreationForm = function () {
-        return document.querySelector("#productForm");
-    };
-    /**
-     * Returns the order creation form.
-     *
-     * @returns {Element} the HTMLFormElement.
-     *
-     * @public
-     */
-    this.getOrderCreationForm = function () {
-        return document.querySelector("#orderForm");
-    };
-    /**
      * Returns the info form.
      *
      * @returns {Element} the HTMLFormElement.
@@ -231,11 +171,11 @@ function View() {
      *
      * @param {Element} form the HTMLFormElement.
      *
-     * @returns {Array} the Array.
+     * @returns {string[]} the array of values from form.
      *
      * @public
      */
-    this.getValuesFromForm = function (form) {
+    this.getFormValues = function (form) {
         var arrOfValues = [];
         for (var i = 0; i < form.length; i++) {
             arrOfValues.push(form[i].value);
@@ -245,17 +185,17 @@ function View() {
     /**
      * Returns the id of selected order.
      *
-     * @returns {String} the String.
+     * @returns {string} the String.
      *
      * @public
      */
     this.getIdOfSelectedOrder = function () {
-        return document.querySelector("#orderId").innerText;
+        return document.querySelector("#orderId").getAttribute("data-id");
     };
     /**
      * Returns the id of info about order.
      *
-     * @returns {String} the String.
+     * @returns {string} the String.
      *
      * @public
      */
@@ -333,9 +273,39 @@ function View() {
         return document.querySelector("#headRow");
     };
     /**
+     * Returns the open order creation window button.
+     *
+     * @returns {Element} the HTMLAnchorElement.
+     *
+     * @public
+     */
+    this.getOpenOrderFormButton = function () {
+        return document.querySelector("#openOrderCreationWindow");
+    };
+    /**
+     * Returns the open product creation window button.
+     *
+     * @returns {Element} the HTMLAnchorElement.
+     *
+     * @public
+     */
+    this.getOpenProductFormButton = function () {
+        return document.querySelector("#openProductCreationWindow");
+    };
+    /**
+     * Returns the body of page.
+     *
+     * @returns {Element} the HTMLAnchorElement.
+     *
+     * @public
+     */
+    this.getBody = function () {
+        return document.querySelector("#body");
+    };
+    /**
      * Displays side bar with orders.
      *
-     * @param {Array} orders the Array of orders.
+     * @param {Object[]} orders the array of orders.
      *
      * @public
      */
@@ -355,16 +325,24 @@ function View() {
      */
     this.displayOrderInfo = function (order) {
         var orderInfoNode = this.getOrderTitleNode();
-        orderInfoNode.innerHTML = '<div>' +
-                '<h3>Order <span class="numOfOrder" id="orderId">' + order.id + '</span></h3>' +
-                '<span class="customer">Customer: ' + order.summary.customer + '</span>' +
-                '<span>Ordered: <span>' + this.formatDate(order.summary.createdAt) + '</span></span>' +
-                '<span>Shipped: <span>' + this.formatDate(order.summary.shippedAt) + '</span></span>' +
-            '</div>' +
-            '<div>' +
-                '<span class="total-price">' + order.summary.totalPrice + '</span>' +
-                '<span>' + order.summary.currency + '</span>' +
-            '</div>';
+        var link = document.querySelector("link[href*=orderInfo]");
+        var template = link.import.querySelector("#orderInfo");
+        var clone = document.importNode(template, true);
+
+        clone.innerHTML = clone.innerHTML.replace("{orderId}", order.id);
+        clone.innerHTML = clone.innerHTML.replace("{customer}", order.summary.customer);
+        clone.innerHTML = clone.innerHTML.replace("{createdAt}", this.formatDate(order.summary.createdAt));
+        clone.innerHTML = clone.innerHTML.replace("{shippedAt}", this.formatDate(order.summary.shippedAt));
+        clone.innerHTML = clone.innerHTML.replace("{totalPrice}", order.summary.totalPrice);
+        clone.innerHTML = clone.innerHTML.replace("{currency}", order.summary.currency);
+
+        clone.children[0].children[0].children[0].setAttribute("data-id", order.id);
+
+        if (orderInfoNode.children[0]) {
+            orderInfoNode.replaceChild(clone, orderInfoNode.children[0]);
+        } else {
+            orderInfoNode.appendChild(clone);
+        }
     };
     /**
      * Displays shipping address of order.
@@ -374,23 +352,21 @@ function View() {
      * @public
      */
     this.displayShipTo = function (order) {
-
         var shipToNode = this.getInfoAboutOrderNode();
-        var div = document.createElement("div");
-        div.id = "address";
-        div.innerHTML = '<h3>Shipping address</h3>' +
-            '<form id="infoForm" class="edit-form">' +
-                '<p><label>Name: </label><span>' + order.shipTo.name + '</span></p>' +
-                '<p><label>Street: </label><span>' + order.shipTo.address + '</span></p>' +
-                '<p><label>ZIP Code/City: </label><span>' + order.shipTo.ZIP + '</span></p>' +
-                '<p><label>Region: </label><span>' + order.shipTo.region + '</span></p>' +
-                '<p><label>Country: </label><span>' + order.shipTo.country + '</span></p>' +
-            '</form>';
+        var link = document.querySelector("link[href*=shipInfoForm]");
+        var template = link.import.querySelector("#address");
+        var clone = document.importNode(template, true);
+
+        clone.innerHTML = clone.innerHTML.replace("{name}", order.shipTo.name);
+        clone.innerHTML = clone.innerHTML.replace("{address}", order.shipTo.address);
+        clone.innerHTML = clone.innerHTML.replace("{ZIP}", order.shipTo.ZIP);
+        clone.innerHTML = clone.innerHTML.replace("{region}", order.shipTo.region);
+        clone.innerHTML = clone.innerHTML.replace("{country}", order.shipTo.country);
 
         if (shipToNode.children.length === 1) {
-            shipToNode.insertBefore(div, shipToNode.children[0])
+            shipToNode.insertBefore(clone, shipToNode.children[0])
         } else {
-            shipToNode.replaceChild(div, shipToNode.children[0]);
+            shipToNode.replaceChild(clone, shipToNode.children[0]);
         }
         this.toggleButtons("truckButton");
 
@@ -398,7 +374,7 @@ function View() {
     /**
      * Displays products of order.
      *
-     * @param {Array} products the array of products.
+     * @param {Object[]} products the array of products.
      *
      * @public
      */
@@ -406,6 +382,7 @@ function View() {
         this.getOrderHeader().classList.remove("invisibility");
         this.getMainNode().classList.remove("invisibility");
         this.getOrderWrapper().classList.remove("no-orders");
+
         var numOfProductsNode = this.getNumOfProducts();
         numOfProductsNode.innerHTML = String(products.length);
         var productsNode = this.getBodyOfProductList();
@@ -438,7 +415,7 @@ function View() {
      * Displays all order info.
      *
      * @param {Object} order the order object.
-     * @param {Array} products the array of products.
+     * @param {Object[]} products the array of products.
      *
      * @public
      */
@@ -456,17 +433,18 @@ function View() {
      */
     this.displayClientInfo = function (order) {
         var clientInfoNode = this.getInfoAboutOrderNode();
-        var div = document.createElement("div");
-        div.id = "client";
-        div.innerHTML = '<h3>Client info</h3>' +
-            '<form id="infoForm" class="edit-form">' +
-                '<p><label>Name: </label><span>' + order.customerInfo.firstName + '</span></p>' +
-                '<p><label>Surname: </label><span>' + order.customerInfo.lastName + '</span></p>' +
-                '<p><label>Street: </label><span>' + order.customerInfo.address + '</span></p>' +
-                '<p><label>number: </label><span>' + order.customerInfo.phone + '</span></p>' +
-                '<p><label>email: </label><span>' + order.customerInfo.email + '</span></p>' +
-            '</form>';
-        clientInfoNode.replaceChild(div, clientInfoNode.children[0]);
+        var link = document.querySelector("link[href*=clientInfoForm]");
+        var template = link.import.querySelector("#client");
+        var clone = document.importNode(template, true);
+
+        clone.innerHTML = clone.innerHTML.replace("{firstName}", order.customerInfo.firstName);
+        clone.innerHTML = clone.innerHTML.replace("{lastName}", order.customerInfo.lastName);
+        clone.innerHTML = clone.innerHTML.replace("{address}", order.customerInfo.address);
+        clone.innerHTML = clone.innerHTML.replace("{phone}", order.customerInfo.phone);
+        clone.innerHTML = clone.innerHTML.replace("{email}", order.customerInfo.email);
+
+        clientInfoNode.replaceChild(clone, clientInfoNode.children[0]);
+
         this.toggleButtons("clientButton");
     };
     /**
@@ -479,26 +457,27 @@ function View() {
      * @public
      */
     this.createOrderItem = function (order) {
-        var orderItem = document.createElement("div");
-        orderItem.className = "order-item";
+        var link = document.querySelector("link[href*=orderItem]");
+        var template = link.import.querySelector(".order-item");
+        var orderItem = document.importNode(template, true);
         orderItem.id = order.id;
-        orderItem.innerHTML = '<div>' +
-                '<h3>Order <span class="order-number">' + order.id + '</span></h3>' +
-                '<span class="customer">' + order.summary.customer + '</span>' +
-                '<span>Shipped: <span>' + this.formatDate(order.summary.shippedAt) + '</span></span>' +
-            '</div>' +
-            '<div>' +
-                '<time>' + this.formatDate(order.summary.createdAt) + '</time>' +
-                '<span class="status ' + this.paintStatus(order.summary.status) + '">' + order.summary.status + '</span>' +
-            '</div>';
+
+        orderItem.innerHTML = orderItem.innerHTML.replace("{orderId}", order.id);
+        orderItem.innerHTML = orderItem.innerHTML.replace("{customer}", order.summary.customer);
+        orderItem.innerHTML = orderItem.innerHTML.replace("{shippedAt}", this.formatDate(order.summary.shippedAt));
+        orderItem.innerHTML = orderItem.innerHTML.replace("{createdAt}", this.formatDate(order.summary.createdAt));
+        orderItem.innerHTML = orderItem.innerHTML.replace("{status}", order.summary.status);
+
+        orderItem.children[1].children[1].classList.add(this.highlightStatus(order.summary.status));
+
         return orderItem;
     };
     /**
      * Formats the date
      *
-     * @param {String} date the date string.
+     * @param {string} date the date string.
      *
-     * @returns {String} the date string.
+     * @returns {string} the date string.
      *
      * @public
      */
@@ -507,22 +486,24 @@ function View() {
         return formattedDate.getDate() + "." + (formattedDate.getMonth() + 1) + "." + formattedDate.getFullYear();
     };
     /**
-     * Adds class depending on value of status to properly paint status.
+     * Adds class, that highlights status depending on value of status.
      *
-     * @param {String} status the status string.
+     * @param {string} status the status string.
      *
-     * @returns {String} the css-class string.
+     * @returns {string} the css-class string.
      *
      * @public
      */
-    this.paintStatus = function (status) {
-        return (status === "pending") ? "pending" : "accepted";
+    this.highlightStatus = function (status) {
+        var pendingStstus = "pending",
+            acceptedStatus = "accepted";
+        return (status === pendingStstus) ? pendingStstus : acceptedStatus;
     };
     /**
      * Removes a class.
      *
-     * @param {String} nameOfClass the string of class name to be deleted.
-     * @param {String} elements the string of class name by which can find the elements.
+     * @param {string} nameOfClass the string of class name to be deleted.
+     * @param {string} elements the string of class name by which can find the elements.
      *
      * @public
      */
@@ -535,7 +516,7 @@ function View() {
     /**
      * Switches classes to display truck, client and map buttons correctly.
      *
-     * @param {String} button the active button name string.
+     * @param {string} button the active button name string.
      *
      * @public
      */
@@ -565,24 +546,11 @@ function View() {
 
     };
     /**
-     * Removes values ​​from form.
-     *
-     * @param {Element} form the HTMLFormElement.
+     * Adds class, that highlights the selected order.
      *
      * @public
      */
-    this.clearForm = function (form) {
-        for (var i = 0; i < form.length - 1; i++) {
-            form[i].value = "";
-            form[i].classList.remove("flaw");
-        }
-    };
-    /**
-     * Adds class to the selected order.
-     *
-     * @public
-     */
-    this.paintOrder = function () {
+    this.highlightOrder = function () {
         var id = this.getIdOfSelectedOrder();
         var selectedOrder = Array.from(this.getOrdersNode().children).filter(function (order) {
             return order.id === id;
@@ -592,7 +560,7 @@ function View() {
     /**
      * Correctly displays buttons depending on conditions.
      *
-     * @param {String} button the button name string.
+     * @param {string} button the button name string.
      *
      * @public
      */
@@ -661,7 +629,7 @@ function View() {
      * Adds a class.
      *
      * @param {Element} element the HTMLDivElement.
-     * @param {String} nameOfClass the class name string.
+     * @param {string} nameOfClass the class name string.
      *
      * @public
      */
@@ -683,20 +651,20 @@ function View() {
     /**
      * Shows what needs to be filled in the form.
      *
-     * @param {Array} flawNumbers array of flaw numbers.
-     * @param {Element} form the HTMLFormElement.
+     * @param {number[]} flawNumbers array of flaw numbers.
+     * @param {Element} formElement the HTMLFormElement.
      *
      * @public
      */
-    this.reportFlaws = function (flawNumbers, form) {
-        for (var i = 0; i < form.length; i++) {
-            form[i].classList.remove("flaw");
+    this.reportFlaws = function (flawNumbers, formElement) {
+        for (var i = 0; i < formElement.length; i++) {
+            formElement[i].classList.remove("flaw");
         }
         for (var i = 0; i < flawNumbers.length; i++) {
 
-            form[flawNumbers[i]].classList.add("flaw");
-            if (form.classList.contains("edit-form")) {
-                form[flawNumbers[i]].placeholder = "Fill me";
+            formElement[flawNumbers[i]].classList.add("flaw");
+            if (formElement.classList.contains("edit-form")) {
+                formElement[flawNumbers[i]].placeholder = "Fill me";
             }
         }
     };
@@ -723,8 +691,8 @@ function View() {
         var arrOfTh = this.getHeadRow().children;
 
         for (var i = 0; i < arrOfTh.length; i++) {
-            for (var j = 0; j < arrOfTh[i].children.length; j++){
-                if (arrOfTh[i].children[j].classList.contains("sorted-by")){
+            for (var j = 0; j < arrOfTh[i].children.length; j++) {
+                if (arrOfTh[i].children[j].classList.contains("sorted-by")) {
                     sortedBy = arrOfTh[i].children[j];
                     break;
                 }
@@ -732,7 +700,7 @@ function View() {
             }
         }
 
-         return sortedBy;
+        return sortedBy;
 
     };
     /**
@@ -740,7 +708,7 @@ function View() {
      *
      *@param {Element} element the HTMLElement from which the setting values ​​will be taken.
      *
-     * @returns {Array} returns array of sort settings.
+     * @returns {string[]} returns array of sort settings.
      *
      * @public
      */
@@ -763,7 +731,7 @@ function View() {
 
         options.push(element.parentElement.getAttribute("data-type"));
 
-        if(element.classList.contains("fa-caret-down")){
+        if (element.classList.contains("fa-caret-down")) {
             options.push("descending");
         } else {
             options.push("ascending");
@@ -771,25 +739,5 @@ function View() {
 
         return options;
     };
-    /**
-     * Converts table rows to product objects
-     *
-     * @returns {Array} returns array of products.
-     *
-     * @public
-     */
-    this.getProductsFromTable = function () {
-        var table = this.getBodyOfProductList();
-        var arrOfRows = Array.prototype.slice.call(table.rows);
-            return arrOfRows.map(function (element) {
-                return {
-                    "name" : element.children[0].children[0].innerText,
-                    "price": element.children[1].children[0].innerText,
-                    "currency": element.children[1].children[1].innerText,
-                    "quantity": element.children[2].innerText,
-                    "totalPrice": element.children[3].children[0].innerText,
-                    "id": element.children[0].children[1].innerText
-                }
-            });
-    };
+
 }
